@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+psycopg2-binary
+redis
+celery
+web3
+scikit-learn
+xgboost
+spacy
+python-jose
+passlib

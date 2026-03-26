@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ScamShield — AI Fraud Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#1B6CF2;--brand-light:#EBF2FF;--brand-mid:#4D8EF7;
+  --safe:#0BAF6A;--safe-bg:#E6F9F1;
+  --danger:#E53935;--danger-bg:#FDECEA;
+  --warn:#F59E0B;--warn-bg:#FFF8EC;
+  --bg:#F4F6FA;--surface:#FFFFFF;--surface2:#F1F4F9;
+  --border:#E2E8F2;--text-1:#0F172A;--text-2:#475569;--text-3:#94A3B8;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.07),0 1px 2px rgba(15,23,42,.04);
+  --shadow-md:0 4px 16px rgba(15,23,42,.09),0 2px 6px rgba(15,23,42,.05);
+  --r:14px;--r-sm:8px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --ease:.18s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--bg);color:var(--text-1);min-height:100vh;line-height:1.6}
+.shell{display:grid;grid-template-columns:252px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:0 20px 22px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--brand);box-shadow:0 4px 12px rgba(27,108,242,.32);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-mark svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sb-name{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.sb-ver{font-size:10px;color:var(--text-3);font-family:var(--mono)}
+.nav-sec{padding:0 10px;margin-bottom:6px}
+.nav-lbl{font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:1.2px;text-transform:uppercase;padding:0 10px;margin-bottom:4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);font-size:13.5px;font-weight:500;color:var(--text-2);cursor:pointer;transition:all var(--ease);background:none;border:none;width:100%;text-align:left}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
+.nav-item:hover{background:var(--surface2);color:var(--text-1)}
+.nav-item.active{background:var(--brand-light);color:var(--brand);font-weight:600}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--brand);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;font-family:var(--mono)}
+.sb-bottom{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;transition:background var(--ease)}
+.sb-user:hover{background:var(--surface2)}
+.sb-avatar{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--brand),var(--brand-mid));display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:600}.sb-urole{font-size:11px;color:var(--text-3)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10}
+.tb-left{display:flex;align-items:center;gap:8px}
+.crumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3)}
+.crumb-cur{color:var(--text-1);font-weight:500}
+.tb-right{display:flex;align-items:center;gap:8px}
+.pill-online{display:inline-flex;align-items:center;gap:6px;background:var(--safe-bg);color:var(--safe);border:1px solid rgba(11,175,106,.2);font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;white-space:nowrap}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulseDot 2s ease infinite}
+.btn-wallet{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 13px;font:500 13px var(--font);color:var(--text-1);cursor:pointer;transition:all var(--ease);white-space:nowrap}
+.btn-wallet svg{width:13px;height:13px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-wallet:hover{border-color:var(--brand);color:var(--brand);background:#fff}
+.btn-wallet.connected{background:var(--brand-light);border-color:rgba(27,108,242,.3);color:var(--brand)}
+.btn-icon{width:34px;height:34px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all var(--ease);color:var(--text-2);position:relative}
+.btn-icon:hover{border-color:var(--brand);color:var(--brand);background:#fff}
+.btn-icon svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.notif-pip{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:2px solid #fff}
+
+/* CONTENT */
+.content{padding:28px;flex:1;overflow-y:auto}
+.page{display:none;animation:fadeU .3s ease both}
+.page.active{display:block}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow-sm);transition:box-shadow var(--ease),transform var(--ease)}
+.kpi:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.kpi-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-ico svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.kpi-ico.blue{background:var(--brand-light);color:var(--brand)}
+.kpi-ico.green{background:var(--safe-bg);color:var(--safe)}
+.kpi-ico.red{background:var(--danger-bg);color:var(--danger)}
+.kpi-ico.amber{background:var(--warn-bg);color:var(--warn)}
+.kpi-delta{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;font-family:var(--mono)}
+.kpi-delta.up{background:var(--safe-bg);color:var(--safe)}
+.kpi-delta.dn{background:var(--danger-bg);color:var(--danger)}
+.kpi-val{font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.kpi-lbl{font-size:11.5px;color:var(--text-3);margin-top:3px}
+
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 368px;gap:18px}
+.r-col{display:flex;flex-direction:column;gap:16px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:16px}
+.card:last-child{margin-bottom:0}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.card-hd-l{display:flex;align-items:center;gap:10px}
+.card-hd-ico{width:28px;height:28px;border-radius:7px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;color:var(--brand)}
+.card-hd-ico svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card-ttl{font-size:14px;font-weight:600}
+.card-sub{font-size:11.5px;color:var(--text-3);margin-top:1px}
+.btn-txt{font:500 12px var(--font);color:var(--brand);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:6px;transition:background var(--ease)}
+.btn-txt:hover{background:var(--brand-light)}
+.card-bd{padding:20px}
+
+/* ANALYZER */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;cursor:pointer;transition:all var(--ease)}
+.chip:hover,.chip.active-chip{background:var(--brand-light);color:var(--brand);border-color:rgba(27,108,242,.3)}
+.inp-lbl{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--text-2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+.char-ct{font-family:var(--mono);font-size:11px;color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0}
+textarea#scamInput{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-family:var(--font);font-size:14px;line-height:1.7;padding:13px 15px;resize:vertical;min-height:118px;outline:none;transition:border-color var(--ease),box-shadow var(--ease),background var(--ease)}
+textarea#scamInput::placeholder{color:var(--text-3)}
+textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(27,108,242,.1)}
+.scan-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:12px 0;display:none}
+.scan-bar.on{display:block}
+.scan-fill{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand-mid));border-radius:2px;transition:width .35s ease}
+.act-row{display:flex;gap:9px;align-items:center;margin-top:14px}
+.btn-pri{display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);padding:10px 20px;font:600 13.5px var(--font);cursor:pointer;transition:all var(--ease);white-space:nowrap;box-shadow:0 2px 8px rgba(27,108,242,.28)}
+.btn-pri svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.btn-pri:hover{background:#1558d4;box-shadow:0 4px 14px rgba(27,108,242,.38);transform:translateY(-1px)}
+.btn-pri:active{transform:none}
+.btn-pri:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-sec{display:flex;align-items:center;gap:6px;background:var(--surface2);color:var(--text-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 14px;font:500 13px var(--font);cursor:pointer;transition:all var(--ease)}
+.btn-sec svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-sec:hover{border-color:var(--brand);color:var(--brand);background:#fff}
+
+/* RESULT */
+.res-box{margin-top:14px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--surface2);overflow:hidden;transition:border-color var(--ease),background var(--ease)}
+.res-box.safe{border-color:rgba(11,175,106,.4);background:var(--safe-bg)}
+.res-box.danger{border-color:rgba(229,57,53,.4);background:var(--danger-bg)}
+.res-box.warn{border-color:rgba(245,158,11,.4);background:var(--warn-bg)}
+.res-hd{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid rgba(0,0,0,.06)}
+.res-ico{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.res-box.safe .res-ico{background:rgba(11,175,106,.18);color:var(--safe)}
+.res-box.danger .res-ico{background:rgba(229,57,53,.18);color:var(--danger)}
+.res-box.warn .res-ico{background:rgba(245,158,11,.18);color:var(--warn)}
+.res-box:not(.safe):not(.danger):not(.warn) .res-ico{background:var(--border);color:var(--text-3)}
+.res-st{font-size:12px;font-weight:700}
+.res-box.safe .res-st{color:var(--safe)}
+.res-box.danger .res-st{color:var(--danger)}
+.res-box.warn .res-st{color:var(--warn)}
+.res-box:not(.safe):not(.danger):not(.warn) .res-st{color:var(--text-3)}
+#result{padding:11px 14px;font-size:13.5px;line-height:1.75;color:var(--text-2);white-space:pre-wrap}
+
+/* HISTORY */
+.hist-list{display:flex;flex-direction:column}
+.hist-item{display:flex;align-items:center;gap:11px;padding:10px 6px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:6px;transition:all var(--ease)}
+.hist-item:last-child{border-bottom:none}
+.hist-item:hover{background:var(--surface2);padding-left:10px;padding-right:10px}
+.h-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.h-dot.safe{background:var(--safe)}.h-dot.danger{background:var(--danger)}.h-dot.warn{background:var(--warn)}
+.h-txt{flex:1;min-width:0}
+.h-msg{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-time{font-size:10.5px;color:var(--text-3);font-family:var(--mono);margin-top:1px}
+.h-badge{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;font-family:var(--mono)}
+.h-badge.safe{background:var(--safe-bg);color:var(--safe)}
+.h-badge.danger{background:var(--danger-bg);color:var(--danger)}
+.h-badge.warn{background:var(--warn-bg);color:var(--warn)}
+
+/* FULL HISTORY PAGE */
+.hist-full-item{display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:10px;cursor:pointer;transition:all var(--ease)}
+.hist-full-item:hover{border-color:var(--brand);box-shadow:var(--shadow-sm)}
+.h-full-txt{flex:1;min-width:0}
+.h-full-msg{font-size:13.5px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-full-detail{font-size:12.5px;color:var(--text-2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.h-full-time{font-size:11px;color:var(--text-3);font-family:var(--mono);margin-top:6px}
+.h-big-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;flex-shrink:0;font-family:var(--mono)}
+.h-big-badge.safe{background:var(--safe-bg);color:var(--safe)}
+.h-big-badge.danger{background:var(--danger-bg);color:var(--danger)}
+.h-big-badge.warn{background:var(--warn-bg);color:var(--warn)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-3)}
+.empty-state svg{width:48px;height:48px;stroke:var(--border);margin-bottom:12px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.empty-state p{font-size:14px}
+
+/* PLATFORMS */
+.plt-list{display:flex;flex-direction:column;gap:8px}
+.plt-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all var(--ease)}
+.plt-row:hover{border-color:var(--brand);background:#fff;box-shadow:var(--shadow-sm)}
+.plt-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.plt-name{font-size:13.5px;font-weight:600}
+.plt-desc{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.plt-tag{margin-left:auto;font-size:10px;font-weight:700;font-family:var(--mono);padding:3px 9px;border-radius:20px;cursor:pointer;border:none;transition:all var(--ease)}
+.plt-tag.on{background:var(--safe-bg);color:var(--safe)}
+.plt-tag.off{background:var(--surface2);color:var(--text-3);border:1px solid var(--border)}
+.plt-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.plt-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px;text-align:center}
+.plt-stat-val{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.plt-stat-lbl{font-size:11px;color:var(--text-3);margin-top:3px}
+
+/* REPORT */
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-bar-wrap{margin-top:8px}
+.chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.chart-bar-lbl{font-size:12px;color:var(--text-2);width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-bar-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.chart-bar-fill.danger{background:var(--danger)}
+.chart-bar-fill.warn{background:var(--warn)}
+.chart-bar-fill.safe{background:var(--safe)}
+.chart-bar-fill.blue{background:var(--brand)}
+.chart-bar-val{font-size:11px;font-family:var(--mono);color:var(--text-3);width:30px;text-align:right;flex-shrink:0}
+.pie-legend{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.pie-legend-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.pie-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pie-pct{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:600}
+.donut-wrap{position:relative;width:120px;height:120px;margin:0 auto 4px}
+.donut-wrap canvas{border-radius:50%}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;font-weight:700;line-height:1}
+.donut-sub{font-size:10px;color:var(--text-3);font-family:var(--mono)}
+
+/* API PAGE */
+.api-section{margin-bottom:20px}
+.api-section-title{font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.api-key-box{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 14px}
+.api-key-val{flex:1;font-family:var(--mono);font-size:12px;color:var(--text-2);letter-spacing:2px}
+.api-copy-btn{font:500 12px var(--font);color:var(--brand);background:var(--brand-light);border:none;border-radius:6px;padding:5px 12px;cursor:pointer;transition:all var(--ease);white-space:nowrap}
+.api-copy-btn:hover{background:var(--brand);color:#fff}
+.code-block{background:#0F172A;border-radius:var(--r-sm);padding:16px;font-family:var(--mono);font-size:12px;color:#CBD5E1;line-height:1.9;overflow-x:auto;margin-top:10px;position:relative}
+.code-kw{color:#93C5FD}.code-str{color:#86EFAC}.code-cm{color:#475569}.code-num{color:#FCA5A5}
+.code-copy{position:absolute;top:10px;right:10px;font:500 11px var(--font);color:#64748B;background:#1E293B;border:1px solid #334155;border-radius:5px;padding:3px 9px;cursor:pointer;transition:all var(--ease)}
+.code-copy:hover{color:#fff;border-color:#475569}
+.endpoint-list{display:flex;flex-direction:column;gap:8px}
+.endpoint-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)}
+.method-tag{font-size:10px;font-weight:700;font-family:var(--mono);padding:2px 8px;border-radius:4px;flex-shrink:0}
+.method-tag.post{background:#DBEAFE;color:#1D4ED8}
+.method-tag.get{background:#D1FAE5;color:#065F46}
+.endpoint-path{font-family:var(--mono);font-size:12.5px;color:var(--text-1)}
+.endpoint-desc{font-size:12px;color:var(--text-3);margin-left:auto}
+
+/* SETTINGS */
+.settings-group{margin-bottom:20px}
+.settings-group-title{font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px}
+.setting-info{flex:1}
+.setting-label{font-size:13.5px;font-weight:500}
+.setting-desc{font-size:12px;color:var(--text-3);margin-top:2px}
+.toggle{position:relative;width:38px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#CBD5E1;border-radius:22px;transition:all .2s}
+.toggle-slider:before{content:"";position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked+.toggle-slider{background:var(--brand)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px)}
+.settings-actions{display:flex;gap:10px;margin-top:20px}
+
+/* NOTIFICATION PANEL */
+.notif-panel{position:fixed;top:70px;right:20px;width:320px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-md);z-index:100;display:none;animation:fadeU .2s ease both}
+.notif-panel.open{display:block}
+.notif-hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-ttl{font-size:14px;font-weight:600}
+.notif-clear{font-size:12px;color:var(--brand);cursor:pointer;background:none;border:none;font-family:var(--font)}
+.notif-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--ease)}
+.notif-item:hover{background:var(--surface2)}
+.notif-item:last-child{border-bottom:none}
+.notif-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.notif-body{flex:1;min-width:0}
+.notif-msg{font-size:12.5px;font-weight:500;line-height:1.4}
+.notif-time{font-size:11px;color:var(--text-3);font-family:var(--mono);margin-top:3px}
+
+/* PLATFORM DETAIL */
+.plt-detail-hd{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.plt-detail-ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.plt-detail-name{font-size:20px;font-weight:700}
+.plt-detail-sub{font-size:13px;color:var(--text-3)}
+.back-btn{display:flex;align-items:center;gap:6px;font:500 13px var(--font);color:var(--text-2);background:none;border:none;cursor:pointer;margin-bottom:16px;padding:6px 10px;border-radius:6px;transition:all var(--ease)}
+.back-btn:hover{background:var(--surface2);color:var(--text-1)}
+.back-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* SCAN RIPPLE */
+@keyframes ripple{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.5);opacity:0}}
+.scan-ripple{animation:ripple 1s ease infinite}
+
+/* ANIMATIONS */
+@keyframes fadeU{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes spinA{to{transform:rotate(360deg)}}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes resIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spinA .6s linear infinite;vertical-align:middle}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--r);padding:24px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:fadeU .2s ease both}
+.modal-ttl{font-size:16px;font-weight:700;margin-bottom:8px}
+.modal-body{font-size:13.5px;color:var(--text-2);line-height:1.7;margin-bottom:20px}
+.modal-acts{display:flex;gap:8px;justify-content:flex-end}
+
+/* WALLET MODAL */
+.wallet-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);z-index:400;display:none;align-items:center;justify-content:center}
+.wallet-modal-overlay.open{display:flex}
+.wallet-modal{background:var(--surface);border-radius:20px;max-width:400px;width:93%;box-shadow:0 32px 100px rgba(15,23,42,.25);animation:fadeU .25s ease both;overflow:hidden}
+.wallet-modal-hd{padding:20px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.wallet-modal-ttl{font-size:16px;font-weight:700}
+.wallet-modal-sub{font-size:12px;color:var(--text-3);margin-top:3px}
+.wallet-modal-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-3);font-size:18px;line-height:1;transition:all var(--ease);flex-shrink:0}
+.wallet-modal-close:hover{background:var(--danger-bg);color:var(--danger);border-color:rgba(229,57,53,.3)}
+.wallet-list{padding:14px 16px;display:flex;flex-direction:column;gap:9px}
+.wallet-opt{display:flex;align-items:center;gap:13px;padding:13px 15px;border:1.5px solid var(--border);border-radius:13px;cursor:pointer;transition:all .2s ease;background:var(--surface);position:relative;overflow:hidden}
+.wallet-opt::before{content:'';position:absolute;inset:0;background:var(--brand-light);opacity:0;transition:opacity .2s}
+.wallet-opt:hover{border-color:var(--brand);transform:translateX(4px);box-shadow:0 4px 16px rgba(27,108,242,.12)}
+.wallet-opt:hover::before{opacity:1}
+.wallet-opt:hover .wallet-opt-name,.wallet-opt:hover .wallet-opt-desc{position:relative;z-index:1}
+.wallet-opt-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.1);position:relative;z-index:1}
+.wallet-opt-name{font-size:14px;font-weight:600;position:relative;z-index:1}
+.wallet-opt-desc{font-size:11.5px;color:var(--text-3);margin-top:2px;position:relative;z-index:1}
+.wallet-opt-badge{margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:var(--mono);flex-shrink:0;position:relative;z-index:1}
+.badge-installed{background:var(--safe-bg);color:var(--safe)}
+.badge-popular{background:var(--brand-light);color:var(--brand)}
+.badge-install{background:var(--surface2);color:var(--text-3);border:1px solid var(--border)}
+.wallet-modal-footer{padding:12px 22px 16px;background:var(--surface2);border-top:1px solid var(--border);font-size:11.5px;color:var(--text-3);text-align:center;line-height:1.6}
+.wallet-modal-footer a{color:var(--brand);text-decoration:none;font-weight:600}
+.wallet-modal-footer a:hover{text-decoration:underline}
+.wm-divider{display:flex;align-items:center;gap:10px;padding:0 16px;margin:4px 0}
+.wm-divider-line{flex:1;height:1px;background:var(--border)}
+.wm-divider-txt{font-size:11px;color:var(--text-3)}
+.wallet-demo-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border:1.5px dashed var(--border);border-radius:13px;cursor:pointer;transition:all .2s;font:500 13px var(--font);color:var(--text-2);background:none;width:100%}
+.wallet-demo-btn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-light)}
+.wallet-connected-panel{padding:20px 22px;text-align:center}
+.wallet-connected-ico{font-size:40px;margin-bottom:8px}
+.wallet-connected-title{font-size:15px;font-weight:700;color:var(--safe);margin-bottom:4px}
+.wallet-addr-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--text-1);word-break:break-all;margin:12px 0;text-align:left}
+.wallet-chain-pill{display:inline-flex;align-items:center;gap:6px;background:var(--warn-bg);color:var(--warn);border:1px solid rgba(245,158,11,.3);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;margin-bottom:14px;font-family:var(--mono)}
+.wallet-disconnect-btn{font:500 13px var(--font);color:var(--danger);background:var(--danger-bg);border:1px solid rgba(229,57,53,.2);border-radius:var(--r-sm);padding:8px 18px;cursor:pointer;transition:all var(--ease)}
+.wallet-disconnect-btn:hover{background:var(--danger);color:#fff}
+@keyframes pulseWallet{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes loadBar{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text-1);color:#fff;font-size:13px;padding:10px 18px;border-radius:var(--r-sm);box-shadow:var(--shadow-md);z-index:300;transform:translateY(20px);opacity:0;transition:all .3s ease;pointer-events:none}
+.toast.show{transform:none;opacity:1}
+
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:740px){.shell{grid-template-columns:1fr}.sidebar{display:none}.content{padding:14px}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-mark"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div><div class="sb-name">ScamShield</div><div class="sb-ver">v2.4.1</div></div>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Tổng quan</div>
+    <button class="nav-item active" onclick="goPage('dashboard',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard <span class="nav-badge" id="badgeDash">3</span>
+    </button>
+    <button class="nav-item" onclick="goPage('analyze',this)">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Phân tích Scam
+    </button>
+    <button class="nav-item" onclick="goPage('history',this)">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Lịch sử quét
+    </button>
+    <button class="nav-item" onclick="goPage('report',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Báo cáo
+    </button>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Nền tảng</div>
+    <button class="nav-item" onclick="goPage('wallet',this)">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Ví điện tử
+    </button>
+    <button class="nav-item" onclick="goPage('bank',this)">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Ngân hàng số
+    </button>
+    <button class="nav-item" onclick="goPage('ecommerce',this)">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Sàn TMĐT
+    </button>
+    <button class="nav-item" onclick="goPage('defi',this)">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Fintech / DeFi
+    </button>
+  </div>
+
+  <div class="nav-sec">
+    <div class="nav-lbl">Hệ thống</div>
+    <button class="nav-item" onclick="goPage('api',this)">
+      <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      API & Tích hợp
+    </button>
+    <button class="nav-item" onclick="goPage('settings',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Cài đặt
+    </button>
+  </div>
+
+  <div class="sb-bottom">
+    <div class="sb-user" onclick="goPage('settings',document.querySelectorAll('.nav-item')[9])">
+      <div class="sb-avatar">A</div>
+      <div><div class="sb-uname">Admin</div><div class="sb-urole">Super Admin</div></div>
+      <svg style="margin-left:auto;width:14px;height:14px;stroke:var(--text-3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="tb-left">
+      <div class="crumb">
+        <span>ScamShield</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="crumb-cur" id="crumbCur">Dashboard</span>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="pill-online"><span class="pulse-dot"></span>Hệ thống hoạt động</div>
+      <button class="btn-icon" title="Thông báo" onclick="toggleNotif()" id="notifBtn">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-pip" id="notifPip"></span>
+      </button>
+      <button class="btn-wallet" id="btnConnect" onclick="connectWallet()">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span id="lblDesk">Kết nối ví</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- NOTIFICATION PANEL -->
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-hd">
+      <div class="notif-ttl">Thông báo</div>
+      <button class="notif-clear" onclick="clearNotifs()">Đánh dấu đã đọc</button>
+    </div>
+    <div id="notifList">
+      <div class="notif-item"><div class="notif-icon" style="background:var(--danger-bg)">🚨</div><div class="notif-body"><div class="notif-msg">Phát hiện URL lừa đảo mới: bnb-airdrop.xyz</div><div class="notif-time">2 phút trước</div></div></div>
+      <div class="notif-item"><div class="notif-icon" style="background:var(--warn-bg)">⚠️</div><div class="notif-body"><div class="notif-msg">Cảnh báo: Tin nhắn scam từ số lạ</div><div class="notif-time">18 phút trước</div></div></div>
+      <div class="notif-item"><div class="notif-icon" style="background:var(--brand-light)">🔄</div><div class="notif-body"><div class="notif-msg">Hệ thống AI đã cập nhật lên model mới</div><div class="notif-time">1 giờ trước</div></div></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ═══════════ PAGE: DASHBOARD ═══════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-ico blue"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span class="kpi-delta up" id="kpiScanDelta">+12%</span></div>
+          <div class="kpi-val" id="kpiScanVal">1,284</div><div class="kpi-lbl">Lượt quét hôm nay</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-ico red"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="kpi-delta dn" id="kpiScamDelta">+3</span></div>
+          <div class="kpi-val" id="kpiScamVal">47</div><div class="kpi-lbl">Scam phát hiện</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-ico green"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="kpi-delta up">+0.4%</span></div>
+          <div class="kpi-val">96.3%</div><div class="kpi-lbl">Độ chính xác AI</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-ico amber"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span class="kpi-delta up">-0.2s</span></div>
+          <div class="kpi-val">0.8s</div><div class="kpi-lbl">Thời gian TB</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-hd-l">
+                <div class="card-hd-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                <div><div class="card-ttl">Phân tích nội dung</div><div class="card-sub">Văn bản · URL · Địa chỉ ví · Mã giao dịch</div></div>
+              </div>
+              <button class="btn-txt" onclick="goPage('history',document.querySelectorAll('.nav-item')[2])">Lịch sử →</button>
+            </div>
+            <div class="card-bd">
+              <div class="chips">
+                <button class="chip" onclick="fillEx('link',this)">🔗 URL đáng ngờ</button>
+                <button class="chip" onclick="fillEx('wallet',this)">💳 Địa chỉ ví</button>
+                <button class="chip" onclick="fillEx('msg',this)">💬 Tin nhắn lừa đảo</button>
+                <button class="chip" onclick="fillEx('tx',this)">📋 Mã giao dịch</button>
+              </div>
+              <div style="margin-bottom:14px">
+                <div class="inp-lbl">Nội dung cần kiểm tra<span class="char-ct" id="charCount">0 ký tự</span></div>
+                <textarea id="scamInput" placeholder="Dán link, địa chỉ ví, tin nhắn, hoặc nội dung đáng ngờ vào đây...&#10;&#10;Ví dụ: https://bnb-airdrop-claim.xyz/free-token" oninput="updCount(this)"></textarea>
+              </div>
+              <div class="scan-bar" id="scanBar"><div class="scan-fill" id="scanFill"></div></div>
+              <div class="act-row">
+                <button class="btn-pri" id="btnScan" onclick="checkScam()">
+                  <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span id="btnTxt">Phân tích ngay</span>
+                </button>
+                <button class="btn-sec" onclick="clearAll()">
+                  <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.85"/></svg>
+                  Làm mới
+                </button>
+              </div>
+              <div class="res-box" id="resBox">
+                <div class="res-hd"><div class="res-ico" id="resIco">?</div><span class="res-st" id="resSt">Chờ phân tích</span></div>
+                <div id="result">Nhập nội dung và nhấn "Phân tích ngay" để bắt đầu kiểm tra.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="r-col">
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="card-ttl">Lịch sử gần đây</div></div></div>
+              <button class="btn-txt" onclick="goPage('history',document.querySelectorAll('.nav-item')[2])">Xem tất cả →</button>
+            </div>
+            <div class="card-bd" style="padding:10px 14px">
+              <div class="hist-list" id="histList">
+                <div class="hist-item" onclick="showHistDetail('bnb-free-airdrop.xyz/claim','danger','Đây là trang web lừa đảo giả mạo airdrop BNB. Không có tổ chức hợp pháp nào phát tặng crypto miễn phí qua link lạ.')"><div class="h-dot danger"></div><div class="h-txt"><div class="h-msg">bnb-free-airdrop.xyz/claim</div><div class="h-time">2 phút trước</div></div><span class="h-badge danger">SCAM</span></div>
+                <div class="hist-item" onclick="showHistDetail('0x742d35Cc6634C0532925a3b8D...','safe','Địa chỉ ví này có lịch sử giao dịch bình thường, không có dấu hiệu lừa đảo.')"><div class="h-dot safe"></div><div class="h-txt"><div class="h-msg">0x742d35Cc6634C0532925a3b8D...</div><div class="h-time">14 phút trước</div></div><span class="h-badge safe">AN TOÀN</span></div>
+                <div class="hist-item" onclick="showHistDetail('Gửi 0.1 BNB nhận 1 BNB...','warn','Đây là mô hình scam kinh điển: yêu cầu gửi tiền trước để nhận lại nhiều hơn. Rất đáng ngờ.')"><div class="h-dot warn"></div><div class="h-txt"><div class="h-msg">"Gửi 0.1 BNB nhận 1 BNB..."</div><div class="h-time">32 phút trước</div></div><span class="h-badge warn">CẢNH BÁO</span></div>
+                <div class="hist-item" onclick="showHistDetail('metamask-support-vn.com','danger','Domain giả mạo MetaMask. Trang này có thể đánh cắp seed phrase và thông tin ví của bạn.')"><div class="h-dot danger"></div><div class="h-txt"><div class="h-msg">metamask-support-vn.com</div><div class="h-time">1 giờ trước</div></div><span class="h-badge danger">SCAM</span></div>
+                <div class="hist-item" onclick="showHistDetail('testnet.bscscan.com/tx/0x9a...','safe','Đây là trang BscScan chính thức, an toàn để kiểm tra giao dịch.')"><div class="h-dot safe"></div><div class="h-txt"><div class="h-msg">testnet.bscscan.com/tx/0x9a...</div><div class="h-time">2 giờ trước</div></div><span class="h-badge safe">AN TOÀN</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-hd-l"><div class="card-hd-ico" style="background:var(--warn-bg);color:var(--warn)"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div><div class="card-ttl">Nền tảng tích hợp</div></div></div>
+              <button class="btn-txt" onclick="goPage('wallet',document.querySelectorAll('.nav-item')[4])">Quản lý →</button>
+            </div>
+            <div class="card-bd" style="padding:10px 14px">
+              <div class="plt-list">
+                <div class="plt-row" onclick="goPage('wallet',document.querySelectorAll('.nav-item')[4])"><div class="plt-ico" style="background:#FFF3E0">💳</div><div><div class="plt-name">Ví điện tử</div><div class="plt-desc">MoMo · ZaloPay · VNPay</div></div><button class="plt-tag on" onclick="event.stopPropagation();togglePlt(this)">ON</button></div>
+                <div class="plt-row" onclick="goPage('bank',document.querySelectorAll('.nav-item')[5])"><div class="plt-ico" style="background:#E3F2FD">🏦</div><div><div class="plt-name">Ngân hàng số</div><div class="plt-desc">BIDV · VCB · Techcombank</div></div><button class="plt-tag on" onclick="event.stopPropagation();togglePlt(this)">ON</button></div>
+                <div class="plt-row" onclick="goPage('ecommerce',document.querySelectorAll('.nav-item')[6])"><div class="plt-ico" style="background:#F3E5F5">🛍️</div><div><div class="plt-name">Sàn TMĐT</div><div class="plt-desc">Shopee · Lazada · Tiki</div></div><button class="plt-tag on" onclick="event.stopPropagation();togglePlt(this)">ON</button></div>
+                <div class="plt-row" onclick="goPage('defi',document.querySelectorAll('.nav-item')[7])"><div class="plt-ico" style="background:#E8F5E9">₿</div><div><div class="plt-name">Crypto / DeFi</div><div class="plt-desc">BNB Chain · MetaMask</div></div><button class="plt-tag on" onclick="event.stopPropagation();togglePlt(this)">ON</button></div>
+                <div class="plt-row"><div class="plt-ico" style="background:#FBE9E7">👤</div><div><div class="plt-name">Người dùng cá nhân</div><div class="plt-desc">API miễn phí</div></div><button class="plt-tag off" onclick="event.stopPropagation();togglePlt(this)">OFF</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: ANALYZE ═══════════ -->
+    <div class="page" id="page-analyze">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div><div class="card-ttl">Phân tích Scam nâng cao</div><div class="card-sub">Sử dụng AI để phân tích chi tiết nội dung đáng ngờ</div></div></div>
+        </div>
+        <div class="card-bd">
+          <div class="chips">
+            <button class="chip" onclick="fillEx2('link',this)">🔗 URL đáng ngờ</button>
+            <button class="chip" onclick="fillEx2('wallet',this)">💳 Địa chỉ ví Crypto</button>
+            <button class="chip" onclick="fillEx2('msg',this)">💬 Tin nhắn lừa đảo</button>
+            <button class="chip" onclick="fillEx2('tx',this)">📋 Mã giao dịch</button>
+            <button class="chip" onclick="fillEx2('phone',this)">📞 Số điện thoại lạ</button>
+            <button class="chip" onclick="fillEx2('email',this)">📧 Email đáng ngờ</button>
+          </div>
+          <div style="margin-bottom:14px">
+            <div class="inp-lbl">Nội dung cần kiểm tra<span class="char-ct" id="charCount2">0 ký tự</span></div>
+            <textarea id="scamInput2" style="min-height:150px;width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-family:var(--font);font-size:14px;line-height:1.7;padding:13px 15px;resize:vertical;outline:none;transition:border-color var(--ease),box-shadow var(--ease),background var(--ease)"
+              placeholder="Nhập bất kỳ nội dung nào cần kiểm tra..." oninput="document.getElementById('charCount2').textContent=this.value.length+' ký tự'"></textarea>
+          </div>
+          <div class="scan-bar" id="scanBar2"><div class="scan-fill" id="scanFill2"></div></div>
+          <div class="act-row">
+            <button class="btn-pri" id="btnScan2" onclick="checkScam2()">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span id="btnTxt2">Phân tích ngay</span>
+            </button>
+            <button class="btn-sec" onclick="document.getElementById('scamInput2').value='';document.getElementById('charCount2').textContent='0 ký tự'">
+              <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.85"/></svg>
+              Làm mới
+            </button>
+          </div>
+          <div class="res-box" id="resBox2" style="margin-top:14px">
+            <div class="res-hd"><div class="res-ico" id="resIco2">?</div><span class="res-st" id="resSt2">Chờ phân tích</span></div>
+            <div id="result2" style="padding:11px 14px;font-size:13.5px;line-height:1.75;color:var(--text-2);white-space:pre-wrap">Nhập nội dung và nhấn "Phân tích ngay" để bắt đầu kiểm tra.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: HISTORY ═══════════ -->
+    <div class="page" id="page-history">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700">Lịch sử quét</h2>
+          <p style="font-size:13px;color:var(--text-3);margin-top:2px">Toàn bộ kết quả phân tích của bạn</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <select id="histFilter" onchange="renderHistoryPage()" style="font:500 13px var(--font);padding:7px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--text-1);outline:none;cursor:pointer">
+            <option value="all">Tất cả</option>
+            <option value="danger">Scam</option>
+            <option value="warn">Cảnh báo</option>
+            <option value="safe">An toàn</option>
+          </select>
+          <button class="btn-sec" onclick="clearHistory()">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            Xóa lịch sử
+          </button>
+        </div>
+      </div>
+      <div id="histPageList"></div>
+    </div>
+
+    <!-- ═══════════ PAGE: REPORT ═══════════ -->
+    <div class="page" id="page-report">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div><h2 style="font-size:18px;font-weight:700">Báo cáo thống kê</h2><p style="font-size:13px;color:var(--text-3);margin-top:2px">Tổng hợp dữ liệu phát hiện scam</p></div>
+        <button class="btn-sec" onclick="exportReport()">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Xuất báo cáo
+        </button>
+      </div>
+      <div class="report-grid">
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico" style="background:var(--danger-bg);color:var(--danger)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="card-ttl">Loại Scam phổ biến</div><div class="card-sub">Tháng này</div></div></div></div>
+          <div class="card-bd">
+            <div class="chart-bar-wrap">
+              <div class="chart-bar-row"><div class="chart-bar-lbl">Airdrop giả</div><div class="chart-bar-track"><div class="chart-bar-fill danger" style="width:78%"></div></div><div class="chart-bar-val">78%</div></div>
+              <div class="chart-bar-row"><div class="chart-bar-lbl">Giả mạo ví</div><div class="chart-bar-track"><div class="chart-bar-fill danger" style="width:65%"></div></div><div class="chart-bar-val">65%</div></div>
+              <div class="chart-bar-row"><div class="chart-bar-lbl">Phishing URL</div><div class="chart-bar-track"><div class="chart-bar-fill warn" style="width:52%"></div></div><div class="chart-bar-val">52%</div></div>
+              <div class="chart-bar-row"><div class="chart-bar-lbl">Tin nhắn lừa</div><div class="chart-bar-track"><div class="chart-bar-fill warn" style="width:41%"></div></div><div class="chart-bar-val">41%</div></div>
+              <div class="chart-bar-row"><div class="chart-bar-lbl">Sàn TMĐT giả</div><div class="chart-bar-track"><div class="chart-bar-fill blue" style="width:28%"></div></div><div class="chart-bar-val">28%</div></div>
+              <div class="chart-bar-row"><div class="chart-bar-lbl">Khác</div><div class="chart-bar-track"><div class="chart-bar-fill safe" style="width:15%"></div></div><div class="chart-bar-val">15%</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="card-ttl">Tỷ lệ kết quả</div><div class="card-sub">Tổng 1,284 lần quét</div></div></div></div>
+          <div class="card-bd" style="text-align:center">
+            <canvas id="donutChart" width="120" height="120" style="max-width:120px;margin:0 auto;display:block"></canvas>
+            <div class="pie-legend" style="margin-top:16px">
+              <div class="pie-legend-item"><div class="pie-dot" style="background:var(--danger)"></div><span>Scam phát hiện</span><span class="pie-pct" style="color:var(--danger)">47 (3.7%)</span></div>
+              <div class="pie-legend-item"><div class="pie-dot" style="background:var(--warn)"></div><span>Cần cảnh báo</span><span class="pie-pct" style="color:var(--warn)">89 (6.9%)</span></div>
+              <div class="pie-legend-item"><div class="pie-dot" style="background:var(--safe)"></div><span>An toàn</span><span class="pie-pct" style="color:var(--safe)">1,148 (89.4%)</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico" style="background:var(--brand-light);color:var(--brand)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><div class="card-ttl">Hoạt động theo nền tảng</div><div class="card-sub">Scam phát hiện theo từng nền tảng</div></div></div></div>
+        <div class="card-bd">
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+            <div style="text-align:center;padding:16px;background:var(--surface2);border-radius:var(--r-sm)"><div style="font-size:24px;margin-bottom:6px">💳</div><div style="font-size:20px;font-weight:700;color:var(--danger)">18</div><div style="font-size:11px;color:var(--text-3)">Ví điện tử</div></div>
+            <div style="text-align:center;padding:16px;background:var(--surface2);border-radius:var(--r-sm)"><div style="font-size:24px;margin-bottom:6px">🏦</div><div style="font-size:20px;font-weight:700;color:var(--warn)">9</div><div style="font-size:11px;color:var(--text-3)">Ngân hàng số</div></div>
+            <div style="text-align:center;padding:16px;background:var(--surface2);border-radius:var(--r-sm)"><div style="font-size:24px;margin-bottom:6px">🛍️</div><div style="font-size:20px;font-weight:700;color:var(--danger)">12</div><div style="font-size:11px;color:var(--text-3)">Sàn TMĐT</div></div>
+            <div style="text-align:center;padding:16px;background:var(--surface2);border-radius:var(--r-sm)"><div style="font-size:24px;margin-bottom:6px">₿</div><div style="font-size:20px;font-weight:700;color:var(--danger)">24</div><div style="font-size:11px;color:var(--text-3)">Crypto/DeFi</div></div>
+            <div style="text-align:center;padding:16px;background:var(--surface2);border-radius:var(--r-sm)"><div style="font-size:24px;margin-bottom:6px">📱</div><div style="font-size:20px;font-weight:700;color:var(--warn)">7</div><div style="font-size:11px;color:var(--text-3)">Cá nhân</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: WALLET ═══════════ -->
+    <div class="page" id="page-wallet">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+        <div style="width:52px;height:52px;border-radius:14px;background:#FFF3E0;display:flex;align-items:center;justify-content:center;font-size:26px">💳</div>
+        <div><div style="font-size:20px;font-weight:700">Ví điện tử</div><div style="font-size:13px;color:var(--text-3);margin-top:2px">Bảo vệ giao dịch MoMo · ZaloPay · VNPay</div></div>
+        <button class="plt-tag on" style="margin-left:auto;font-size:12px;padding:6px 14px" onclick="togglePlt(this)">ON</button>
+      </div>
+      <div class="plt-stats">
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--brand)">342</div><div class="plt-stat-lbl">Giao dịch đã quét</div></div>
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--danger)">12</div><div class="plt-stat-lbl">Scam phát hiện</div></div>
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--safe)">96.5%</div><div class="plt-stat-lbl">Tỷ lệ an toàn</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><div class="card-ttl">Kiểm tra giao dịch ví</div></div></div></div>
+        <div class="card-bd">
+          <p style="font-size:13.5px;color:var(--text-2);margin-bottom:14px">Nhập thông tin giao dịch hoặc số điện thoại nhận tiền để kiểm tra.</p>
+          <textarea id="walletInput" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-family:var(--font);font-size:14px;line-height:1.7;padding:13px 15px;resize:vertical;min-height:100px;outline:none;transition:all var(--ease)" placeholder="VD: 0901234567 - MoMo, hoặc nội dung lệnh chuyển khoản..." onfocus="this.style.borderColor='var(--brand)'"></textarea>
+          <div class="act-row">
+            <button class="btn-pri" onclick="checkPlatform('wallet')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Kiểm tra ngay</button>
+            <button class="btn-sec" onclick="document.getElementById('walletInput').value=''">Xóa</button>
+          </div>
+          <div class="res-box" id="resWallet" style="margin-top:14px">
+            <div class="res-hd"><div class="res-ico">?</div><span class="res-st" style="color:var(--text-3)">Chờ kiểm tra</span></div>
+            <div style="padding:11px 14px;font-size:13.5px;color:var(--text-2)">Nhập thông tin và nhấn kiểm tra.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: BANK ═══════════ -->
+    <div class="page" id="page-bank">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+        <div style="width:52px;height:52px;border-radius:14px;background:#E3F2FD;display:flex;align-items:center;justify-content:center;font-size:26px">🏦</div>
+        <div><div style="font-size:20px;font-weight:700">Ngân hàng số</div><div style="font-size:13px;color:var(--text-3);margin-top:2px">Phát hiện scam qua BIDV · Vietcombank · Techcombank</div></div>
+        <button class="plt-tag on" style="margin-left:auto;font-size:12px;padding:6px 14px" onclick="togglePlt(this)">ON</button>
+      </div>
+      <div class="plt-stats">
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--brand)">218</div><div class="plt-stat-lbl">Lệnh đã quét</div></div>
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--danger)">9</div><div class="plt-stat-lbl">Cảnh báo</div></div>
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--safe)">95.9%</div><div class="plt-stat-lbl">Tỷ lệ an toàn</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><div class="card-ttl">Kiểm tra số tài khoản / lệnh chuyển khoản</div></div></div></div>
+        <div class="card-bd">
+          <textarea id="bankInput" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-family:var(--font);font-size:14px;line-height:1.7;padding:13px 15px;resize:vertical;min-height:100px;outline:none;transition:all var(--ease)" placeholder="VD: STK 19034512345678 - Vietcombank, hoặc nội dung SMS ngân hàng..." onfocus="this.style.borderColor='var(--brand)'"></textarea>
+          <div class="act-row">
+            <button class="btn-pri" onclick="checkPlatform('bank')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Kiểm tra ngay</button>
+            <button class="btn-sec" onclick="document.getElementById('bankInput').value=''">Xóa</button>
+          </div>
+          <div class="res-box" id="resBank" style="margin-top:14px">
+            <div class="res-hd"><div class="res-ico">?</div><span class="res-st" style="color:var(--text-3)">Chờ kiểm tra</span></div>
+            <div style="padding:11px 14px;font-size:13.5px;color:var(--text-2)">Nhập thông tin và nhấn kiểm tra.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: ECOMMERCE ═══════════ -->
+    <div class="page" id="page-ecommerce">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+        <div style="width:52px;height:52px;border-radius:14px;background:#F3E5F5;display:flex;align-items:center;justify-content:center;font-size:26px">🛍️</div>
+        <div><div style="font-size:20px;font-weight:700">Sàn TMĐT</div><div style="font-size:13px;color:var(--text-3);margin-top:2px">Bảo vệ mua sắm Shopee · Lazada · Tiki</div></div>
+        <button class="plt-tag on" style="margin-left:auto;font-size:12px;padding:6px 14px" onclick="togglePlt(this)">ON</button>
+      </div>
+      <div class="plt-stats">
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--brand)">156</div><div class="plt-stat-lbl">Link đã quét</div></div>
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--danger)">12</div><div class="plt-stat-lbl">Scam phát hiện</div></div>
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--safe)">92.3%</div><div class="plt-stat-lbl">Tỷ lệ an toàn</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><div class="card-ttl">Kiểm tra link sản phẩm / shop</div></div></div></div>
+        <div class="card-bd">
+          <textarea id="ecomInput" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-family:var(--font);font-size:14px;line-height:1.7;padding:13px 15px;resize:vertical;min-height:100px;outline:none;transition:all var(--ease)" placeholder="VD: https://shopee.vn/product/... hoặc tên shop đáng ngờ..." onfocus="this.style.borderColor='var(--brand)'"></textarea>
+          <div class="act-row">
+            <button class="btn-pri" onclick="checkPlatform('ecom')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Kiểm tra ngay</button>
+            <button class="btn-sec" onclick="document.getElementById('ecomInput').value=''">Xóa</button>
+          </div>
+          <div class="res-box" id="resEcom" style="margin-top:14px">
+            <div class="res-hd"><div class="res-ico">?</div><span class="res-st" style="color:var(--text-3)">Chờ kiểm tra</span></div>
+            <div style="padding:11px 14px;font-size:13.5px;color:var(--text-2)">Nhập thông tin và nhấn kiểm tra.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: DEFI ═══════════ -->
+    <div class="page" id="page-defi">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+        <div style="width:52px;height:52px;border-radius:14px;background:#E8F5E9;display:flex;align-items:center;justify-content:center;font-size:26px">₿</div>
+        <div><div style="font-size:20px;font-weight:700">Fintech / DeFi</div><div style="font-size:13px;color:var(--text-3);margin-top:2px">Bảo vệ BNB Chain · MetaMask · DeFi protocols</div></div>
+        <button class="plt-tag on" style="margin-left:auto;font-size:12px;padding:6px 14px" onclick="togglePlt(this)">ON</button>
+      </div>
+      <div class="plt-stats">
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--brand)">568</div><div class="plt-stat-lbl">Địa chỉ đã quét</div></div>
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--danger)">24</div><div class="plt-stat-lbl">Scam phát hiện</div></div>
+        <div class="plt-stat"><div class="plt-stat-val" style="color:var(--safe)">95.8%</div><div class="plt-stat-lbl">Tỷ lệ an toàn</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><div class="card-ttl">Kiểm tra địa chỉ ví / smart contract</div></div></div></div>
+        <div class="card-bd">
+          <textarea id="defiInput" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-family:var(--font);font-size:14px;line-height:1.7;padding:13px 15px;resize:vertical;min-height:100px;outline:none;transition:all var(--ease)" placeholder="VD: 0xdead000000000000000042069420694206942069 hoặc contract address..." onfocus="this.style.borderColor='var(--brand)'"></textarea>
+          <div class="act-row">
+            <button class="btn-pri" onclick="checkPlatform('defi')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Kiểm tra ngay</button>
+            <button class="btn-sec" onclick="document.getElementById('defiInput').value=''">Xóa</button>
+          </div>
+          <div class="res-box" id="resDefi" style="margin-top:14px">
+            <div class="res-hd"><div class="res-ico">?</div><span class="res-st" style="color:var(--text-3)">Chờ kiểm tra</span></div>
+            <div style="padding:11px 14px;font-size:13.5px;color:var(--text-2)">Nhập thông tin và nhấn kiểm tra.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: API ═══════════ -->
+    <div class="page" id="page-api">
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">API & Tích hợp</h2>
+      <p style="font-size:13px;color:var(--text-3);margin-bottom:20px">Tích hợp ScamShield vào hệ thống của bạn qua REST API</p>
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg></div><div><div class="card-ttl">API Key của bạn</div><div class="card-sub">Dùng key này để xác thực request</div></div></div><button class="btn-txt" onclick="regenKey()">Tạo key mới</button></div>
+        <div class="card-bd">
+          <div class="api-key-box">
+            <div class="api-key-val" id="apiKeyVal">ss_live_••••••••••••••••••••••••••••••••</div>
+            <button class="api-copy-btn" onclick="toggleKey(this)">Hiện</button>
+            <button class="api-copy-btn" onclick="copyKey()">Sao chép</button>
+          </div>
+          <p style="font-size:12px;color:var(--text-3);margin-top:8px">⚠️ Không chia sẻ API key với bất kỳ ai. Giữ key này bảo mật.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><div><div class="card-ttl">Endpoints</div><div class="card-sub">Base URL: https://api.scamshield.vn/v1</div></div></div></div>
+        <div class="card-bd">
+          <div class="endpoint-list">
+            <div class="endpoint-row"><span class="method-tag post">POST</span><code class="endpoint-path">/check</code><span class="endpoint-desc">Phân tích nội dung scam</span></div>
+            <div class="endpoint-row"><span class="method-tag get">GET</span><code class="endpoint-path">/history</code><span class="endpoint-desc">Lấy lịch sử quét</span></div>
+            <div class="endpoint-row"><span class="method-tag get">GET</span><code class="endpoint-path">/stats</code><span class="endpoint-desc">Thống kê tổng hợp</span></div>
+            <div class="endpoint-row"><span class="method-tag post">POST</span><code class="endpoint-path">/report</code><span class="endpoint-desc">Báo cáo scam mới</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><div><div class="card-ttl">Ví dụ sử dụng</div></div></div></div>
+        <div class="card-bd">
+          <div class="code-block">
+            <button class="code-copy" onclick="copyCode()">Sao chép</button>
+<span class="code-cm">// Gọi API ScamShield</span>
+<span class="code-kw">const</span> response = <span class="code-kw">await</span> fetch(<span class="code-str">'https://api.scamshield.vn/v1/check'</span>, {
+  method: <span class="code-str">'POST'</span>,
+  headers: {
+    <span class="code-str">'Authorization'</span>: <span class="code-str">'Bearer YOUR_API_KEY'</span>,
+    <span class="code-str">'Content-Type'</span>: <span class="code-str">'application/json'</span>
+  },
+  body: JSON.stringify({
+    message: <span class="code-str">'https://bnb-airdrop-claim.xyz'</span>,
+    platform: <span class="code-str">'crypto'</span>
+  })
+});
+
+<span class="code-kw">const</span> data = <span class="code-kw">await</span> response.json();
+<span class="code-cm">// { result: "SCAM", confidence: 0.97, reason: "..." }</span>
+console.log(data.result); <span class="code-cm">// "SCAM"</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAGE: SETTINGS ═══════════ -->
+    <div class="page" id="page-settings">
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Cài đặt</h2>
+      <p style="font-size:13px;color:var(--text-3);margin-bottom:24px">Tùy chỉnh hệ thống ScamShield theo nhu cầu của bạn</p>
+
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="card-ttl">Bảo mật & Phân tích</div></div></div></div>
+        <div class="card-bd">
+          <div class="setting-row">
+            <div class="setting-info"><div class="setting-label">Phân tích AI tự động</div><div class="setting-desc">Tự động phân tích nội dung khi nhận được</div></div>
+            <label class="toggle"><input type="checkbox" checked onchange="saveSetting('autoAI',this.checked)"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><div class="setting-label">Cảnh báo realtime</div><div class="setting-desc">Gửi thông báo ngay khi phát hiện scam</div></div>
+            <label class="toggle"><input type="checkbox" checked onchange="saveSetting('realtime',this.checked)"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><div class="setting-label">Lưu lịch sử quét</div><div class="setting-desc">Lưu tất cả kết quả phân tích để xem lại</div></div>
+            <label class="toggle"><input type="checkbox" checked onchange="saveSetting('saveHistory',this.checked)"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><div class="setting-label">Chế độ nghiêm ngặt</div><div class="setting-desc">Tăng độ nhạy phát hiện, có thể có false positive</div></div>
+            <label class="toggle"><input type="checkbox" onchange="saveSetting('strictMode',this.checked)"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico" style="background:var(--warn-bg);color:var(--warn)"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="card-ttl">Thông báo</div></div></div></div>
+        <div class="card-bd">
+          <div class="setting-row">
+            <div class="setting-info"><div class="setting-label">Thông báo trong ứng dụng</div><div class="setting-desc">Hiển thị popup khi có cảnh báo mới</div></div>
+            <label class="toggle"><input type="checkbox" checked onchange="saveSetting('inAppNotif',this.checked)"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><div class="setting-label">Email cảnh báo</div><div class="setting-desc">Gửi email khi phát hiện scam nghiêm trọng</div></div>
+            <label class="toggle"><input type="checkbox" onchange="saveSetting('emailAlert',this.checked)"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><div class="setting-label">Báo cáo hàng tuần</div><div class="setting-desc">Nhận tóm tắt hoạt động mỗi thứ Hai</div></div>
+            <label class="toggle"><input type="checkbox" checked onchange="saveSetting('weeklyReport',this.checked)"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico" style="background:var(--danger-bg);color:var(--danger)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></div><div><div class="card-ttl">Vùng nguy hiểm</div></div></div></div>
+        <div class="card-bd">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-sec" onclick="confirmAction('Xóa toàn bộ lịch sử quét?','Hành động này không thể hoàn tác.','clearHistory')">🗑️ Xóa lịch sử</button>
+            <button class="btn-sec" onclick="confirmAction('Reset cài đặt về mặc định?','Tất cả tùy chỉnh sẽ bị mất.','resetSettings')">🔄 Reset cài đặt</button>
+            <button class="btn-sec" style="color:var(--danger);border-color:var(--danger)" onclick="confirmAction('Xóa tài khoản?','Toàn bộ dữ liệu sẽ bị xóa vĩnh viễn.','deleteAccount')">⚠️ Xóa tài khoản</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .content -->
+</div><!-- end .main -->
+</div><!-- end .shell -->
+
+<!-- WALLET MODAL -->
+<div class="wallet-modal-overlay" id="walletModalOverlay" onclick="closeWalletModal(event)">
+  <div class="wallet-modal" id="walletModal">
+    <!-- Select wallet view -->
+    <div id="walletSelectView">
+      <div class="wallet-modal-hd">
+        <div>
+          <div class="wallet-modal-ttl">🔐 Kết nối ví</div>
+          <div class="wallet-modal-sub">Chọn ví để kết nối với ScamShield</div>
+        </div>
+        <div class="wallet-modal-close" onclick="closeWalletModal()">×</div>
+      </div>
+      <div class="wallet-list" id="walletList">
+        <!-- Populated by JS -->
+      </div>
+      <div class="wm-divider"><div class="wm-divider-line"></div><div class="wm-divider-txt">hoặc</div><div class="wm-divider-line"></div></div>
+      <div style="padding:0 16px 14px">
+        <button class="wallet-demo-btn" onclick="connectDemo()">
+          <span>🎭</span> Dùng chế độ Demo (không cần ví thật)
+        </button>
+      </div>
+      <div class="wallet-modal-footer">
+        Bằng cách kết nối, bạn đồng ý với <a href="#">Điều khoản dịch vụ</a><br>
+        ScamShield không lưu trữ private key hay seed phrase của bạn
+      </div>
+    </div>
+
+    <!-- Connected view -->
+    <div id="walletConnectedView" style="display:none">
+      <div class="wallet-modal-hd">
+        <div><div class="wallet-modal-ttl">✅ Ví đã kết nối</div></div>
+        <div class="wallet-modal-close" onclick="closeWalletModal()">×</div>
+      </div>
+      <div class="wallet-connected-panel">
+        <div class="wallet-connected-ico" id="wcIco">🦊</div>
+        <div class="wallet-connected-title" id="wcTitle">Đã kết nối thành công!</div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:10px" id="wcWalletName">MetaMask</div>
+        <div class="wallet-chain-pill" id="wcChain">⬡ BNB Testnet</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-2);text-align:left;margin-bottom:4px">Địa chỉ ví</div>
+        <div class="wallet-addr-box" id="wcAddr">0x742d...3b8D</div>
+        <div style="display:flex;gap:8px;justify-content:center">
+          <button class="btn-sec" style="font-size:12px;padding:7px 14px" onclick="copyWalletAddr()">📋 Sao chép</button>
+          <button class="wallet-disconnect-btn" onclick="disconnectWallet()">Ngắt kết nối</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connecting view -->
+    <div id="walletConnectingView" style="display:none">
+      <div class="wallet-modal-hd">
+        <div><div class="wallet-modal-ttl">🔄 Đang kết nối...</div></div>
+        <div class="wallet-modal-close" onclick="closeWalletModal()">×</div>
+      </div>
+      <div style="padding:40px 24px;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px;animation:pulseWallet 1s ease infinite" id="connectingIco">🦊</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px" id="connectingMsg">Đang kết nối MetaMask...</div>
+        <div style="font-size:12.5px;color:var(--text-3)">Vui lòng xác nhận trong extension ví của bạn</div>
+        <div style="margin-top:20px;height:3px;background:var(--border);border-radius:2px;overflow:hidden">
+          <div style="height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-mid));border-radius:2px;animation:loadBar 2s ease infinite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-ttl" id="modalTtl">Xác nhận</div>
+    <div class="modal-body" id="modalBody">Bạn có chắc chắn không?</div>
+    <div class="modal-acts">
+      <button class="btn-sec" onclick="closeModal()">Hủy</button>
+      <button class="btn-pri" id="modalConfirm" style="background:var(--danger)">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────────────────
+const API_KEY_REAL = 'ss_live_Xk9mP2nQ7rT4vL6wY1aB3cD5eF8gH0j';
+let keyVisible = false;
+let scanCount = 1284, scamCount = 47;
+let history = [
+  {msg:'bnb-free-airdrop.xyz/claim', type:'danger', detail:'Trang web lừa đảo giả mạo airdrop BNB. Không có tổ chức hợp pháp nào tặng crypto miễn phí như vậy.', time:'2 phút trước'},
+  {msg:'0x742d35Cc6634C0532925a3b8D...', type:'safe', detail:'Địa chỉ ví hợp lệ, lịch sử giao dịch bình thường, không có dấu hiệu bất thường.', time:'14 phút trước'},
+  {msg:'"Gửi 0.1 BNB nhận 1 BNB..."', type:'warn', detail:'Mô hình scam "nhân đôi tiền" điển hình. Không bao giờ gửi tiền để nhận lại nhiều hơn.', time:'32 phút trước'},
+  {msg:'metamask-support-vn.com', type:'danger', detail:'Domain giả mạo MetaMask. Có thể đánh cắp seed phrase và thông tin ví.', time:'1 giờ trước'},
+  {msg:'testnet.bscscan.com/tx/0x9a...', type:'safe', detail:'Trang BscScan chính thức, an toàn để theo dõi giao dịch blockchain.', time:'2 giờ trước'},
+];
+// ─── NAVIGATION ────────────────────────────────────────────────────────────
+const pageNames = {dashboard:'Dashboard','analyze':'Phân tích Scam',history:'Lịch sử quét',report:'Báo cáo',wallet:'Ví điện tử',bank:'Ngân hàng số',ecommerce:'Sàn TMĐT',defi:'Fintech / DeFi',api:'API & Tích hợp',settings:'Cài đặt'};
+
+function goPage(id, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(navEl) navEl.classList.add('active');
+  document.getElementById('crumbCur').textContent = pageNames[id] || id;
+  if(id === 'history') renderHistoryPage();
+  if(id === 'report') drawDonut();
+  closeNotif();
+}
+
+// ─── EXAMPLES ──────────────────────────────────────────────────────────────
+const EX = {
+  link:'https://bnb-airdrop-claim.xyz/free-token?ref=123456',
+  wallet:'0x000000000000000000000000000000000000dEaD',
+  msg:'Chúc mừng bạn đã trúng thưởng 500 USDT! Gửi 0.05 BNB để nhận thưởng ngay hôm nay. Liên hệ: t.me/bnb_support_official',
+  tx:'0xabc123def456789abc123def456789abc123def456789abc123def456789abc1',
+  phone:'+84901234567 - Nhắn tin yêu cầu chuyển tiền khẩn cấp 2 triệu đồng',
+  email:'no-reply@vietcombank-secure.xyz - Tài khoản bị tạm khóa, click để xác nhận'
+};
+function fillEx(t, el) {
+  document.getElementById('scamInput').value = EX[t];
+  document.getElementById('charCount').textContent = EX[t].length + ' ký tự';
+  document.querySelectorAll('.chips .chip').forEach(c => c.classList.remove('active-chip'));
+  el.classList.add('active-chip');
+}
+function fillEx2(t, el) {
+  document.getElementById('scamInput2').value = EX[t];
+  document.getElementById('charCount2').textContent = EX[t].length + ' ký tự';
+  el.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active-chip'));
+  el.classList.add('active-chip');
+}
+function updCount(el) { document.getElementById('charCount').textContent = el.value.length + ' ký tự'; }
+function clearAll() {
+  const ta = document.getElementById('scamInput'); ta.value = ''; updCount(ta);
+  document.querySelectorAll('.chips .chip').forEach(c => c.classList.remove('active-chip'));
+  setRes('resBox','resIco','resSt','result','Nhập nội dung và nhấn "Phân tích ngay" để bắt đầu kiểm tra.','','Chờ phân tích');
+}
+
+// ─── RESULT UI ──────────────────────────────────────────────────────────────
+function setRes(boxId, icoId, stId, resId, txt, type, st) {
+  const box = document.getElementById(boxId),
+        el  = document.getElementById(resId),
+        ico = document.getElementById(icoId),
+        status = document.getElementById(stId);
+  box.className = 'res-box' + (type ? ' ' + type : '');
+  el.textContent = txt;
+  ico.textContent = {safe:'✓', danger:'✕', warn:'!'}[type] || '?';
+  status.textContent = st || 'Chờ phân tích';
+  status.style.color = type === 'safe' ? 'var(--safe)' : type === 'danger' ? 'var(--danger)' : type === 'warn' ? 'var(--warn)' : 'var(--text-3)';
+  box.style.animation = 'none';
+  requestAnimationFrame(() => { box.style.animation = 'resIn .3s ease both'; });
+}
+
+// ─── LOADING BAR ────────────────────────────────────────────────────────────
+function setScanLoading(barId, fillId, btnId, txtId, on) {
+  const btn = document.getElementById(btnId), txt = document.getElementById(txtId);
+  const bar = document.getElementById(barId), fill = document.getElementById(fillId);
+  btn.disabled = on;
+  if(on) {
+    txt.innerHTML = '<span class="spin"></span> Đang phân tích...';
+    bar.classList.add('on');
+    let w = 0;
+    btn._si = setInterval(() => { w = Math.min(w + Math.random()*12, 85); fill.style.width = w+'%'; }, 200);
+  } else {
+    clearInterval(btn._si);
+    fill.style.width = '100%';
+    setTimeout(() => { bar.classList.remove('on'); fill.style.width = '0%'; }, 400);
+    txt.textContent = 'Phân tích ngay';
+  }
+}
+
+// ─── SMART SCAM DETECTION ENGINE (Offline - No API needed) ──────────────────
+const SCAM_RULES = {
+  // URL patterns
+  urlScam: [
+    /airdrop.*claim/i, /free.*token/i, /crypto.*giveaway/i, /bnb.*free/i, /eth.*free/i,
+    /metamask.*support/i, /wallet.*recover/i, /seed.*phrase/i, /verify.*wallet/i,
+    /binance.*support/i, /trust.*wallet.*help/i, /claim.*reward/i, /stake.*earn/i,
+    /nft.*free/i, /usdt.*earn/i, /bitcoin.*double/i, /crypto.*profit/i,
+    /connect.*wallet.*earn/i, /defi.*100x/i, /investment.*return/i
+  ],
+  urlWarn: [
+    /\.xyz$/i, /\.top$/i, /\.click$/i, /\.tk$/i, /\.ml$/i, /\.ga$/i, /\.cf$/i,
+    /[0-9]{4,}\./, /ip\d+\.\d+\.\d+\.\d+/,
+    /vietcombank-/i, /bidv-/i, /techcombank-/i, /momo-/i, /zalopay-/i,
+    /paypal-/i, /binance-/i, /coinbase-/i, /-support\./i, /-help\./i,
+    /secure-.*\.com/i, /verify-.*\.com/i
+  ],
+
+  // Message scam patterns
+  msgScam: [
+    /trúng thưởng/i, /chúc mừng.*nhận/i, /gửi.*nhận lại/i, /double.*coin/i,
+    /nhân đôi/i, /lãi suất.*%.*ngày/i, /đầu tư.*lợi nhuận/i, /cam kết.*lời/i,
+    /seed phrase/i, /private key/i, /từ khóa bí mật/i, /cụm từ khôi phục/i,
+    /tài khoản.*bị khóa/i, /xác minh ngay/i, /cập nhật.*thông tin/i,
+    /click.*link.*nhận/i, /liên hệ.*admin/i, /group.*telegram.*vip/i,
+    /đặt cọc.*nhận/i, /phí rút tiền/i, /phí xử lý/i, /phí giải phóng/i,
+    /hoàng tử.*nigeria/i, /di sản.*thừa kế/i, /lottery.*winner/i,
+    /bạn đã được chọn/i, /may mắn.*phần thưởng/i
+  ],
+  msgWarn: [
+    /gửi tiền ngay/i, /chuyển khoản gấp/i, /khẩn cấp.*tiền/i,
+    /không nói ai/i, /bí mật/i, /nhanh lên/i, /hết hạn.*giờ/i,
+    /số lượng có hạn/i, /cơ hội.*bỏ lỡ/i, /đầu tư.*an toàn/i,
+    /lợi nhuận.*cao/i, /ổn định.*thu nhập/i, /làm việc tại nhà/i
+  ],
+
+  // Phone scam
+  phoneScam: [
+    /công an/i, /cảnh sát/i, /viện kiểm sát/i, /tòa án/i, /ngân hàng nhà nước/i,
+    /bộ công an/i, /interpol/i, /liên quan.*vụ án/i, /bắt giữ/i, /lệnh bắt/i,
+    /nợ xấu/i, /rửa tiền/i, /ma túy/i, /tội phạm/i
+  ],
+
+  // Wallet/crypto specific
+  walletScam: [
+    /0x0{10,}/i,  // lots of zeros = burn address
+    /dead.*address/i, /burn.*address/i,
+  ],
+  walletSafe: [
+    /^0x[0-9a-fA-F]{40}$/, // valid ETH address format
+  ],
+
+  // Safe domains
+  safeDomains: [
+    'google.com', 'facebook.com', 'youtube.com', 'github.com',
+    'metamask.io', 'etherscan.io', 'bscscan.com', 'binance.com',
+    'coinbase.com', 'trustwallet.com', 'uniswap.org', 'opensea.io',
+    'shopee.vn', 'lazada.vn', 'tiki.vn', 'sendo.vn',
+    'momo.vn', 'zalopay.vn', 'vnpay.vn',
+    'vietcombank.com.vn', 'bidv.com.vn', 'techcombank.com.vn',
+    'agribank.com.vn', 'vpbank.com.vn', 'acb.com.vn',
+    'vnexpress.net', 'tuoitre.vn', 'dantri.com.vn', 'thanhnien.vn',
+    'wikipedia.org', 'anthropic.com', 'openai.com'
+  ]
+};
+
+async function callClaudeAI(content, context) {
+  return await analyzeScamOffline(content, context);
+}
+
+async function analyzeScamOffline(content, context) {
+  // Simulate slight processing delay for UX
+  await new Promise(r => setTimeout(r, 800 + Math.random()*700));
+
+  const text = content.trim();
+  const ltext = text.toLowerCase();
+  let score = 0; // positive = danger, negative = safe
+  const reasons = [];
+  const tips = [];
+
+  // ── Detect content type ──────────────────────────────────────────────────
+  const isURL = /^https?:\/\//i.test(text) || /^www\./i.test(text) || /\.[a-z]{2,6}(\/|$)/i.test(text);
+  const isWallet = /^0x[0-9a-fA-F]{40}$/i.test(text.trim());
+  const isTxHash = /^0x[0-9a-fA-F]{64}$/i.test(text.trim());
+  const isPhone = /^(\+84|0)[0-9]{8,10}$/.test(text.replace(/\s/g,''));
+  const isEmail = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(text);
+
+  // ── URL Analysis ─────────────────────────────────────────────────────────
+  if(isURL) {
+    let domain = '';
+    try {
+      const urlStr = text.startsWith('http') ? text : 'https://'+text;
+      domain = new URL(urlStr).hostname.replace(/^www\./, '');
+    } catch(e) {
+      domain = text.replace(/^https?:\/\//i,'').split('/')[0];
+    }
+
+    // Check safe domains
+    const isSafeDomain = SCAM_RULES.safeDomains.some(d => domain === d || domain.endsWith('.'+d));
+    if(isSafeDomain) {
+      score -= 60;
+      reasons.push(`✓ Domain "${domain}" là trang web uy tín, đã được xác minh`);
+    }
+
+    // Check scam URL patterns
+    const urlScamHits = SCAM_RULES.urlScam.filter(r => r.test(text));
+    if(urlScamHits.length > 0) {
+      score += 70 + urlScamHits.length * 10;
+      reasons.push(`✗ URL chứa từ khóa lừa đảo điển hình: airdrop, free token, claim reward...`);
+      tips.push('Không bao giờ nhấp vào link nhận token/tiền miễn phí từ nguồn không rõ ràng');
+    }
+
+    // Check warn URL patterns
+    const urlWarnHits = SCAM_RULES.urlWarn.filter(r => r.test(domain));
+    if(urlWarnHits.length > 0) {
+      score += 40 * urlWarnHits.length;
+      if(/\.xyz$|\.top$|\.click$|\.tk$|\.ml$/.test(domain)) {
+        reasons.push(`⚠ Domain đuôi ".${domain.split('.').pop()}" thường được dùng cho trang web lừa đảo`);
+      }
+      if(/vietcombank|bidv|techcombank|momo|zalopay|binance|coinbase/i.test(domain)) {
+        reasons.push(`✗ Domain giả mạo thương hiệu nổi tiếng: "${domain}" KHÔNG phải trang chính thức`);
+        score += 50;
+      }
+    }
+
+    // Check suspicious subdomains/paths
+    if((text.match(/\//g)||[]).length > 4) {
+      score += 10;
+    }
+
+    // Check for IP address URLs
+    if(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(domain)) {
+      score += 50;
+      reasons.push('✗ URL dùng địa chỉ IP thay vì tên miền — rất đáng ngờ');
+    }
+
+    // MetaMask specific URL
+    if(/metamask\.io/i.test(domain) && !domain.endsWith('metamask.io')) {
+      score += 80;
+      reasons.push('✗ Giả mạo MetaMask! Domain thật là metamask.io');
+    } else if(/metamask\.io/i.test(domain) && domain === 'metamask.io') {
+      score -= 40;
+      reasons.push('✓ Đây là domain chính thức của MetaMask (app.metamask.io)');
+    }
+  }
+
+  // ── Wallet Analysis ──────────────────────────────────────────────────────
+  if(isWallet) {
+    const addr = text.trim();
+    // Dead/burn address
+    if(/^0x0{39,40}$/i.test(addr) || /dead/i.test(addr)) {
+      score += 40;
+      reasons.push('⚠ Đây là "burn address" (địa chỉ đốt tiền) — gửi tiền vào đây sẽ mất vĩnh viễn');
+      tips.push('Burn address (0x000...dead) không thuộc ai — tiền gửi vào sẽ biến mất');
+    } else {
+      score -= 30;
+      reasons.push(`✓ Địa chỉ ví hợp lệ (${addr.slice(0,10)}...${addr.slice(-6)})`);
+      tips.push('Luôn xác minh địa chỉ ví trên BscScan/Etherscan trước khi giao dịch');
+      tips.push('Kiểm tra lịch sử giao dịch: nếu chỉ nhận tiền từ nhiều địa chỉ lạ → đáng ngờ');
+    }
+  }
+
+  // ── Transaction Hash ─────────────────────────────────────────────────────
+  if(isTxHash) {
+    score -= 20;
+    reasons.push('✓ Đây là mã giao dịch (TX Hash) blockchain — có thể tra cứu trên BscScan/Etherscan');
+    tips.push('Truy cập https://bscscan.com hoặc https://etherscan.io và nhập mã này để xem chi tiết giao dịch');
+  }
+
+  // ── Phone Analysis ───────────────────────────────────────────────────────
+  if(isPhone) {
+    const phoneScamHits = SCAM_RULES.phoneScam.filter(r => r.test(ltext));
+    if(phoneScamHits.length) {
+      score += 70;
+      reasons.push('✗ Nội dung liên quan đến cuộc gọi giả mạo cơ quan chức năng (công an, tòa án...)');
+      tips.push('Cơ quan nhà nước KHÔNG BAO GIỜ gọi điện yêu cầu chuyển tiền');
+      tips.push('Hãy gác máy và gọi lại số chính thức của cơ quan đó để xác minh');
+    } else {
+      score += 10;
+      reasons.push('⚠ Số điện thoại lạ — nên thận trọng trước khi phản hồi');
+      tips.push('Tra cứu số điện thoại này trên Google để kiểm tra có báo cáo lừa đảo không');
+    }
+  }
+
+  // ── Email Analysis ───────────────────────────────────────────────────────
+  if(isEmail) {
+    const emailDomain = text.match(/@([a-z0-9.-]+)/i)?.[1] || '';
+    const fakeBank = /vietcombank|bidv|techcombank|agribank|momo|zalopay|paypal|binance|coinbase/i.test(emailDomain);
+    if(fakeBank && !emailDomain.endsWith('.vn') && !emailDomain.endsWith('.com.vn')) {
+      score += 70;
+      reasons.push(`✗ Email giả mạo tổ chức tài chính! Domain "${emailDomain}" không phải email chính thức`);
+    }
+    if(/\.xyz$|\.top$|\.tk$|\.ml$|\.ga$/.test(emailDomain)) {
+      score += 50;
+      reasons.push('✗ Email dùng domain rẻ tiền thường thấy trong scam');
+    }
+  }
+
+  // ── Message Content Analysis ─────────────────────────────────────────────
+  const msgScamHits = SCAM_RULES.msgScam.filter(r => r.test(ltext));
+  const msgWarnHits = SCAM_RULES.msgWarn.filter(r => r.test(ltext));
+
+  if(msgScamHits.length >= 2) {
+    score += 60 + msgScamHits.length * 8;
+    reasons.push(`✗ Tin nhắn chứa ${msgScamHits.length} dấu hiệu lừa đảo điển hình`);
+    if(/trúng thưởng|chúc mừng/i.test(ltext)) reasons.push('✗ Thông báo "trúng thưởng" từ nguồn không rõ ràng — 99% là scam');
+    if(/gửi.*nhận lại|nhân đôi|double/i.test(ltext)) reasons.push('✗ Chiêu "gửi tiền nhận lại nhiều hơn" là lừa đảo kinh điển');
+    if(/seed phrase|private key|từ khóa bí mật/i.test(ltext)) { score += 50; reasons.push('🚨 YÊU CẦU SEED PHRASE/PRIVATE KEY — ĐÂY LÀ SCAM 100%!'); }
+    if(/phí rút|phí xử lý|phí giải phóng|đặt cọc/i.test(ltext)) reasons.push('✗ Yêu cầu trả "phí" để nhận tiền — scam điển hình');
+    tips.push('Không bao giờ chia sẻ seed phrase/private key với bất kỳ ai, kể cả "admin" hay "hỗ trợ"');
+  } else if(msgScamHits.length === 1) {
+    score += 30;
+    reasons.push('⚠ Phát hiện 1 dấu hiệu nghi ngờ trong nội dung tin nhắn');
+  }
+
+  if(msgWarnHits.length >= 2) {
+    score += 25;
+    reasons.push(`⚠ Nội dung tạo áp lực thời gian hoặc hứa lợi nhuận không thực tế`);
+    tips.push('Cảnh giác với những lời đề nghị "khẩn cấp" hoặc "cơ hội không thể bỏ lỡ"');
+  }
+
+  // ── Final scoring ────────────────────────────────────────────────────────
+  if(reasons.length === 0) {
+    if(score <= 0) reasons.push('Không phát hiện dấu hiệu lừa đảo rõ ràng trong nội dung này');
+    else reasons.push('Nội dung có một số điểm cần chú ý');
+  }
+  if(tips.length === 0) {
+    tips.push('Luôn xác minh thông tin qua kênh chính thức trước khi thực hiện bất kỳ giao dịch nào');
+  }
+
+  // ── Format result ────────────────────────────────────────────────────────
+  const safeLink = isWallet && !(/0x0{39}/i.test(text)) && !(/dead/i.test(text))
+    ? `\n\n🔍 Tra cứu thêm: https://bscscan.com/address/${text.trim()}`
+    : isTxHash ? `\n\n🔍 Tra cứu: https://bscscan.com/tx/${text.trim()}` : '';
+
+  if(score >= 60) {
+    return `🚨 CẢNH BÁO SCAM: Nội dung này có khả năng cao là lừa đảo!\n\n` +
+      `📋 Phân tích:\n${reasons.map(r=>'• '+r).join('\n')}\n\n` +
+      `💡 Khuyến nghị:\n${tips.map(t=>'• '+t).join('\n')}` + safeLink;
+  } else if(score >= 20) {
+    return `⚠️ CẦN CHÚ Ý: Nội dung này có một số dấu hiệu đáng ngờ, hãy cẩn thận!\n\n` +
+      `📋 Phân tích:\n${reasons.map(r=>'• '+r).join('\n')}\n\n` +
+      `💡 Khuyến nghị:\n${tips.map(t=>'• '+t).join('\n')}` + safeLink;
+  } else {
+    return `✅ AN TOÀN: Không phát hiện dấu hiệu lừa đảo rõ ràng.\n\n` +
+      `📋 Phân tích:\n${reasons.map(r=>'• '+r).join('\n')}\n\n` +
+      `💡 Lưu ý:\n${tips.map(t=>'• '+t).join('\n')}` + safeLink;
+  }
+}
+
+function detectType(text) {
+  const t = text.toLowerCase();
+  if(t.includes('🚨') || t.includes('scam') || t.includes('lừa') || t.includes('nguy hiểm') || t.includes('cảnh báo scam')) return 'danger';
+  if(t.includes('⚠️') || t.includes('cần chú ý') || t.includes('đáng ngờ') || t.includes('cẩn thận')) return 'warn';
+  if(t.includes('✅') || t.includes('an toàn') || t.includes('hợp lệ') || t.includes('bình thường')) return 'safe';
+  return 'warn';
+}
+
+// ─── MAIN CHECK ─────────────────────────────────────────────────────────────
+async function checkScam() {
+  const txt = document.getElementById('scamInput').value.trim();
+  if(!txt) { setRes('resBox','resIco','resSt','result','⚠️ Vui lòng nhập nội dung cần kiểm tra.','warn','Thiếu dữ liệu'); return; }
+  setScanLoading('scanBar','scanFill','btnScan','btnTxt',true);
+  setRes('resBox','resIco','resSt','result','Đang phân tích bằng AI...','','Đang xử lý');
+  try {
+    const aiResult = await callClaudeAI(txt, 'chung');
+    const type = detectType(aiResult);
+    const stMap = {danger:'⚠️ Phát hiện Scam', safe:'✅ An toàn', warn:'⚡ Cần chú ý'};
+    setRes('resBox','resIco','resSt','result', aiResult, type, stMap[type]);
+    pushHistory(txt.slice(0,45)+(txt.length>45?'...':''), type, aiResult);
+    updateKPIs(type);
+  } catch(e) {
+    setRes('resBox','resIco','resSt','result', 'Không thể kết nối AI. Vui lòng thử lại sau.\n\nLỗi: '+e.message, 'warn', 'Lỗi kết nối');
+  } finally { setScanLoading('scanBar','scanFill','btnScan','btnTxt',false); }
+}
+
+async function checkScam2() {
+  const txt = document.getElementById('scamInput2').value.trim();
+  if(!txt) { setRes('resBox2','resIco2','resSt2','result2','⚠️ Vui lòng nhập nội dung cần kiểm tra.','warn','Thiếu dữ liệu'); return; }
+  setScanLoading('scanBar2','scanFill2','btnScan2','btnTxt2',true);
+  setRes('resBox2','resIco2','resSt2','result2','Đang phân tích bằng AI...','','Đang xử lý');
+  try {
+    const aiResult = await callClaudeAI(txt, 'phân tích nâng cao');
+    const type = detectType(aiResult);
+    const stMap = {danger:'⚠️ Phát hiện Scam', safe:'✅ An toàn', warn:'⚡ Cần chú ý'};
+    setRes('resBox2','resIco2','resSt2','result2', aiResult, type, stMap[type]);
+    pushHistory(txt.slice(0,45)+(txt.length>45?'...':''), type, aiResult);
+    updateKPIs(type);
+  } catch(e) {
+    setRes('resBox2','resIco2','resSt2','result2', 'Không thể kết nối AI. Vui lòng thử lại sau.\n\nLỗi: '+e.message, 'warn', 'Lỗi kết nối');
+  } finally { setScanLoading('scanBar2','scanFill2','btnScan2','btnTxt2',false); }
+}
+
+async function checkPlatform(plt) {
+  const inputMap = {wallet:'walletInput', bank:'bankInput', ecom:'ecomInput', defi:'defiInput'};
+  const resMap   = {wallet:'resWallet', bank:'resBank', ecom:'resEcom', defi:'resDefi'};
+  const ctxMap   = {wallet:'ví điện tử MoMo/ZaloPay', bank:'ngân hàng số VN', ecom:'sàn thương mại điện tử', defi:'crypto/DeFi/blockchain'};
+  const input = document.getElementById(inputMap[plt]);
+  const txt = input.value.trim();
+  if(!txt) { toast('⚠️ Vui lòng nhập nội dung cần kiểm tra'); return; }
+
+  const resBox = document.getElementById(resMap[plt]);
+  resBox.innerHTML = '<div class="res-hd"><div class="res-ico">⏳</div><span class="res-st" style="color:var(--text-3)">Đang phân tích...</span></div><div style="padding:11px 14px;font-size:13.5px;color:var(--text-2)">Đang gửi tới AI...</div>';
+
+  try {
+    const aiResult = await callClaudeAI(txt, ctxMap[plt]);
+    const type = detectType(aiResult);
+    const stMap = {danger:'⚠️ Phát hiện Scam', safe:'✅ An toàn', warn:'⚡ Cần chú ý'};
+    resBox.className = 'res-box ' + type;
+    resBox.innerHTML = `<div class="res-hd"><div class="res-ico">${{safe:'✓',danger:'✕',warn:'!'}[type]||'?'}</div><span class="res-st">${stMap[type]}</span></div><div style="padding:11px 14px;font-size:13.5px;color:var(--text-2);white-space:pre-wrap">${aiResult}</div>`;
+    resBox.style.animation = 'none';
+    requestAnimationFrame(() => { resBox.style.animation = 'resIn .3s ease both'; });
+    pushHistory(txt.slice(0,45)+(txt.length>45?'...':''), type, aiResult);
+    updateKPIs(type);
+  } catch(e) {
+    resBox.className = 'res-box warn';
+    resBox.innerHTML = `<div class="res-hd"><div class="res-ico">!</div><span class="res-st">Lỗi kết nối</span></div><div style="padding:11px 14px;font-size:13.5px;color:var(--text-2)">Không thể kết nối AI. Thử lại sau.\n${e.message}</div>`;
+  }
+}
+
+// ─── KPIs UPDATE ────────────────────────────────────────────────────────────
+function updateKPIs(type) {
+  scanCount++;
+  if(type === 'danger') scamCount++;
+  const sv = document.getElementById('kpiScanVal'), sc = document.getElementById('kpiScamVal');
+  if(sv) sv.textContent = scanCount.toLocaleString();
+  if(sc) sc.textContent = scamCount;
+  if(type === 'danger') { document.getElementById('kpiScamDelta').textContent = '+' + (scamCount - 44); }
+}
+
+// ─── HISTORY ────────────────────────────────────────────────────────────────
+function pushHistory(msg, type, detail) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+  history.unshift({msg, type, detail: detail || '', time: 'Vừa xong · ' + timeStr});
+  if(history.length > 50) history.pop();
+
+  // Update sidebar mini-list
+  const list = document.getElementById('histList');
+  const badges = {safe:'AN TOÀN', danger:'SCAM', warn:'CẢNH BÁO'};
+  const el = document.createElement('div');
+  el.className = 'hist-item';
+  el.style.animation = 'resIn .3s ease both';
+  el.innerHTML = `<div class="h-dot ${type}"></div><div class="h-txt"><div class="h-msg">${msg}</div><div class="h-time">Vừa xong</div></div><span class="h-badge ${type}">${badges[type]}</span>`;
+  el.onclick = () => showHistDetail(msg, type, detail);
+  list.insertBefore(el, list.firstChild);
+  if(list.children.length > 6) list.removeChild(list.lastChild);
+
+  // badge
+  const badge = document.getElementById('badgeDash');
+  if(type === 'danger') { badge.textContent = parseInt(badge.textContent||0) + 1; }
+
+  // Notification
+  if(type === 'danger') addNotif('🚨', `Phát hiện scam: ${msg.slice(0,30)}...`);
+}
+
+function showHistDetail(msg, type, detail) {
+  const typeLabel = {safe:'AN TOÀN ✅', danger:'SCAM 🚨', warn:'CẢNH BÁO ⚠️'}[type];
+  openModal(typeLabel, `Nội dung: ${msg}\n\nKết quả AI: ${detail || '(Không có chi tiết)'}`, null);
+}
+
+function renderHistoryPage() {
+  const filter = document.getElementById('histFilter')?.value || 'all';
+  const list = document.getElementById('histPageList');
+  const filtered = history.filter(h => filter === 'all' || h.type === filter);
+  const badges = {safe:'AN TOÀN', danger:'SCAM', warn:'CẢNH BÁO'};
+
+  if(filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Chưa có lịch sử quét</p></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(h => `
+    <div class="hist-full-item" onclick="showHistDetail('${h.msg.replace(/'/g,"\\'")}','${h.type}','${(h.detail||'').replace(/'/g,"\\'").replace(/\n/g,' ')}')">
+      <div class="h-dot ${h.type}" style="width:9px;height:9px;margin-top:5px"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13.5px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.msg}</div>
+        <div style="font-size:12.5px;color:var(--text-2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${h.detail||'Không có chi tiết'}</div>
+        <div style="font-size:11px;color:var(--text-3);font-family:var(--mono);margin-top:5px">${h.time}</div>
+      </div>
+      <span class="h-badge ${h.type}" style="font-size:10px;padding:3px 9px">${badges[h.type]}</span>
+    </div>
+  `).join('');
+}
+
+function clearHistory() {
+  openModal('Xóa lịch sử', 'Toàn bộ lịch sử quét sẽ bị xóa. Không thể hoàn tác!', () => {
+    history = [];
+    document.getElementById('histList').innerHTML = '';
+    renderHistoryPage();
+    toast('✅ Đã xóa lịch sử');
+  });
+}
+
+// ─── DONUT CHART ────────────────────────────────────────────────────────────
+function drawDonut() {
+  const canvas = document.getElementById('donutChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 60, cy = 60, r = 48, lw = 16;
+  const data = [{v:47,c:'#E53935'},{v:89,c:'#F59E0B'},{v:1148,c:'#0BAF6A'}];
+  const total = data.reduce((a,b) => a + b.v, 0);
+  let start = -Math.PI/2;
+  ctx.clearRect(0,0,120,120);
+  data.forEach(d => {
+    const sweep = (d.v/total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,start,start+sweep);
+    ctx.strokeStyle = d.c; ctx.lineWidth = lw; ctx.stroke();
+    start += sweep;
+  });
+  ctx.fillStyle = '#0F172A'; ctx.font = 'bold 16px DM Sans,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('1,284', cx, cy-6);
+  ctx.fillStyle = '#94A3B8'; ctx.font = '10px DM Mono,monospace';
+  ctx.fillText('TỔNG', cx, cy+10);
+}
+
+// ─── PLATFORMS ──────────────────────────────────────────────────────────────
+function togglePlt(btn) {
+  const isOn = btn.classList.contains('on');
+  btn.classList.toggle('on', !isOn);
+  btn.classList.toggle('off', isOn);
+  btn.textContent = isOn ? 'OFF' : 'ON';
+  toast(isOn ? '⏸ Đã tắt tích hợp' : '✅ Đã bật tích hợp');
+}
+
+// ─── WALLET ─────────────────────────────────────────────────────────────────
+const BNB_TESTNET = {chainId:"0x61",chainName:"BNB Smart Chain Testnet",nativeCurrency:{name:"tBNB",symbol:"tBNB",decimals:18},rpcUrls:["https://data-seed-prebsc-1-s1.bnbchain.org:8545"],blockExplorerUrls:["https://testnet.bscscan.com"]};
+
+let connectedWallet = null;
+let connectedAddress = null;
+
+const WALLETS = [
+  { id:'metamask',  name:'MetaMask',       desc:'Ví phổ biến nhất cho Ethereum/BNB', ico:'🦊', bg:'#FFF3E0', check: ()=> !!(window.ethereum?.isMetaMask || window.ethereum?.providers?.some(p=>p.isMetaMask)), install:'https://metamask.io/download/' },
+  { id:'coinbase',  name:'Coinbase Wallet', desc:'Ví chính thức của Coinbase',        ico:'🔵', bg:'#E3F2FD', check: ()=> !!(window.ethereum?.isCoinbaseWallet || window.ethereum?.providers?.some(p=>p.isCoinbaseWallet)), install:'https://www.coinbase.com/wallet/downloads' },
+  { id:'trust',     name:'Trust Wallet',    desc:'Ví di động đa chuỗi phổ biến',      ico:'🛡️', bg:'#E8F5E9', check: ()=> !!(window.ethereum?.isTrust), install:'https://trustwallet.com/download' },
+  { id:'brave',     name:'Brave Wallet',    desc:'Ví tích hợp trong trình duyệt Brave',ico:'🦁', bg:'#FFF8EC', check: ()=> !!(window.ethereum?.isBraveWallet), install:'https://brave.com/download/' },
+];
+
+function openWalletModal() {
+  // If already connected → show connected view
+  if(connectedAddress) { showWalletView('connected'); }
+  else { buildWalletList(); showWalletView('select'); }
+  document.getElementById('walletModalOverlay').classList.add('open');
+}
+
+function closeWalletModal(e) {
+  if(!e || e.target === document.getElementById('walletModalOverlay')) {
+    document.getElementById('walletModalOverlay').classList.remove('open');
+  }
+}
+
+function showWalletView(view) {
+  document.getElementById('walletSelectView').style.display    = view==='select'     ? '' : 'none';
+  document.getElementById('walletConnectedView').style.display = view==='connected'  ? '' : 'none';
+  document.getElementById('walletConnectingView').style.display= view==='connecting' ? '' : 'none';
+}
+
+function buildWalletList() {
+  const list = document.getElementById('walletList');
+  list.innerHTML = WALLETS.map(w => {
+    const installed = w.check();
+    const badge = installed
+      ? `<span class="wallet-opt-badge badge-installed">✓ Đã cài</span>`
+      : (w.id==='metamask' ? `<span class="wallet-opt-badge badge-popular">Phổ biến</span>` : `<span class="wallet-opt-badge badge-install">Cài đặt</span>`);
+    return `
+      <div class="wallet-opt" onclick="selectWallet('${w.id}')">
+        <div class="wallet-opt-ico" style="background:${w.bg}">${w.ico}</div>
+        <div>
+          <div class="wallet-opt-name">${w.name}</div>
+          <div class="wallet-opt-desc">${installed ? w.desc : 'Chưa cài — Click để cài đặt'}</div>
+        </div>
+        ${badge}
+      </div>`;
+  }).join('');
+}
+
+async function selectWallet(walletId) {
+  const w = WALLETS.find(x => x.id === walletId);
+  if(!w) return;
+
+  // Get provider
+  let provider = null;
+  if(window.ethereum) {
+    if(window.ethereum.providers) {
+      if(walletId==='metamask')   provider = window.ethereum.providers.find(p=>p.isMetaMask&&!p.isCoinbaseWallet);
+      else if(walletId==='coinbase') provider = window.ethereum.providers.find(p=>p.isCoinbaseWallet);
+      else provider = window.ethereum.providers[0];
+    } else {
+      provider = window.ethereum;
+    }
+  }
+
+  if(!provider) {
+    // Not installed → offer to install
+    const go = confirm(`${w.ico} ${w.name} chưa được cài đặt.\n\nBấm OK để mở trang tải xuống.`);
+    if(go) window.open(w.install, '_blank');
+    return;
+  }
+
+  // Show connecting
+  document.getElementById('connectingIco').textContent = w.ico;
+  document.getElementById('connectingMsg').textContent  = `Đang kết nối ${w.name}...`;
+  showWalletView('connecting');
+
+  try {
+    const accs = await provider.request({method:'eth_requestAccounts'});
+    // Switch to BNB testnet
+    try {
+      await provider.request({method:'wallet_switchEthereumChain', params:[{chainId:BNB_TESTNET.chainId}]});
+    } catch(e) {
+      if(e.code===4902) await provider.request({method:'wallet_addEthereumChain', params:[BNB_TESTNET]});
+    }
+
+    connectedAddress = accs[0];
+    connectedWallet  = w;
+
+    // Update connected view
+    document.getElementById('wcIco').textContent       = w.ico;
+    document.getElementById('wcTitle').textContent     = 'Đã kết nối thành công!';
+    document.getElementById('wcWalletName').textContent= w.name;
+    document.getElementById('wcAddr').textContent      = connectedAddress;
+    document.getElementById('wcChain').textContent     = '⬡ BNB Testnet';
+    showWalletView('connected');
+
+    // Update topbar button
+    const short = connectedAddress.slice(0,6)+'...'+connectedAddress.slice(-4);
+    setWUI(`${w.ico} ${short}`, 'connected');
+    toast(`✅ Đã kết nối ${w.name}: ${short}`);
+
+    provider.on?.('accountsChanged', a => {
+      if(a.length) { connectedAddress=a[0]; document.getElementById('wcAddr').textContent=a[0]; setWUI(`${w.ico} ${a[0].slice(0,6)}...${a[0].slice(-4)}`,'connected'); }
+      else disconnectWallet();
+    });
+    provider.on?.('chainChanged', () => location.reload());
+
+  } catch(e) {
+    showWalletView('select');
+    if(e.code !== 4001) toast('⚠️ Lỗi kết nối: ' + e.message);
+    else toast('❌ Người dùng đã hủy kết nối');
+  }
+}
+
+async function connectDemo() {
+  document.getElementById('connectingIco').textContent = '🎭';
+  document.getElementById('connectingMsg').textContent  = 'Đang tạo ví demo...';
+  showWalletView('connecting');
+  await new Promise(r => setTimeout(r, 1200));
+
+  const demoAddr = '0x' + [...Array(40)].map(()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+  connectedAddress = demoAddr;
+  connectedWallet  = {ico:'🎭', name:'Demo Wallet'};
+
+  document.getElementById('wcIco').textContent       = '🎭';
+  document.getElementById('wcTitle').textContent     = 'Chế độ Demo đang hoạt động';
+  document.getElementById('wcWalletName').textContent= 'Demo Wallet (không thật)';
+  document.getElementById('wcAddr').textContent      = demoAddr;
+  document.getElementById('wcChain').textContent     = '🎭 Demo Mode';
+  showWalletView('connected');
+
+  const short = demoAddr.slice(0,6)+'...'+demoAddr.slice(-4);
+  setWUI(`🎭 ${short}`, 'connected');
+  toast('🎭 Chế độ demo đã kích hoạt: ' + short);
+}
+
+function disconnectWallet() {
+  connectedAddress = null;
+  connectedWallet  = null;
+  setWUI('Kết nối ví', '');
+  closeWalletModal();
+  toast('🔌 Đã ngắt kết nối ví');
+}
+
+function copyWalletAddr() {
+  if(connectedAddress) navigator.clipboard.writeText(connectedAddress).then(()=>toast('📋 Đã sao chép địa chỉ ví'));
+}
+
+function connectWallet() { openWalletModal(); }
+
+function setWUI(lbl,cls) {
+  const b = document.getElementById('btnConnect'), l = document.getElementById('lblDesk');
+  if(b) b.className = 'btn-wallet'+(cls?' '+cls:'');
+  if(l) l.textContent = lbl;
+}
+
+// ─── NOTIFICATIONS ──────────────────────────────────────────────────────────
+function toggleNotif() { document.getElementById('notifPanel').classList.toggle('open'); }
+function closeNotif()  { document.getElementById('notifPanel').classList.remove('open'); }
+function clearNotifs() {
+  document.getElementById('notifList').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px">Không có thông báo mới</div>';
+  document.getElementById('notifPip').style.display = 'none';
+  toast('✅ Đã đánh dấu tất cả là đã đọc');
+}
+function addNotif(ico, msg) {
+  const list = document.getElementById('notifList');
+  const el = document.createElement('div');
+  el.className = 'notif-item';
+  el.innerHTML = `<div class="notif-icon" style="background:var(--danger-bg)">${ico}</div><div class="notif-body"><div class="notif-msg">${msg}</div><div class="notif-time">Vừa xong</div></div>`;
+  list.insertBefore(el, list.firstChild);
+  document.getElementById('notifPip').style.display = 'block';
+}
+
+// ─── API PAGE ────────────────────────────────────────────────────────────────
+function toggleKey(btn) {
+  keyVisible = !keyVisible;
+  document.getElementById('apiKeyVal').textContent = keyVisible ? API_KEY_REAL : 'ss_live_••••••••••••••••••••••••••••••••';
+  btn.textContent = keyVisible ? 'Ẩn' : 'Hiện';
+}
+function copyKey() {
+  navigator.clipboard.writeText(API_KEY_REAL).then(() => toast('✅ Đã sao chép API key'));
+}
+function copyCode() {
+  const code = document.querySelector('.code-block').innerText.replace('Sao chép','');
+  navigator.clipboard.writeText(code).then(() => toast('✅ Đã sao chép code'));
+}
+function regenKey() {
+  openModal('Tạo API key mới?', 'Key cũ sẽ bị vô hiệu hóa ngay lập tức. Bạn có chắc không?', () => {
+    toast('✅ Đã tạo API key mới');
+    closeModal();
+  });
+}
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+function saveSetting(key, val) { toast(`✅ Đã lưu: ${key} = ${val}`); }
+function resetSettings() {
+  document.querySelectorAll('#page-settings input[type=checkbox]').forEach((cb, i) => { cb.checked = [true,true,true,false,true,false,true][i] ?? false; });
+  toast('✅ Đã reset cài đặt về mặc định');
+  closeModal();
+}
+function deleteAccount() { toast('⚠️ Chức năng này chỉ demo'); closeModal(); }
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+let modalCallback = null;
+function openModal(ttl, body, cb) {
+  document.getElementById('modalTtl').textContent = ttl;
+  document.getElementById('modalBody').style.whiteSpace = 'pre-wrap';
+  document.getElementById('modalBody').textContent = body;
+  document.getElementById('modalOverlay').classList.add('open');
+  modalCallback = cb;
+  document.getElementById('modalConfirm').onclick = () => { if(modalCallback) { modalCallback(); closeModal(); } else closeModal(); };
+}
+function closeModal(e) {
+  if(!e || e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+    modalCallback = null;
+  }
+}
+function confirmAction(ttl, body, action) { openModal(ttl, body, window[action] ? window[action] : null); }
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+let _toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+function exportReport() {
+  const rows = ['Nội dung,Kết quả,Thời gian', ...history.map(h => `"${h.msg}","${h.type}","${h.time}"`)];
+  const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'scamshield-report.csv'; a.click();
+  toast('✅ Đã xuất báo cáo CSV');
+}
+
+// ─── KEYBOARD ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.ctrlKey) {
+    const act = document.querySelector('.page.active');
+    if(act?.id === 'page-dashboard') checkScam();
+    if(act?.id === 'page-analyze') checkScam2();
+  }
+  if(e.key === 'Escape') { closeModal(); closeNotif(); }
+});
+document.addEventListener('click', e => {
+  if(!e.target.closest('#notifPanel') && !e.target.closest('#notifBtn')) closeNotif();
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // animate KPIs counting up
+  const vals = [{el:'kpiScanVal', target:1284}, {el:'kpiScamVal', target:47}];
+  vals.forEach(({el, target}) => {
+    const dom = document.getElementById(el); if(!dom) return;
+    let cur = 0; const step = Math.ceil(target/40);
+    const iv = setInterval(() => { cur = Math.min(cur+step, target); dom.textContent = cur.toLocaleString(); if(cur>=target) clearInterval(iv); }, 30);
+  });
+});
+</script>
+</body>
+</html>
