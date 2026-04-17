@@ -359,6 +359,11 @@ textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Báo cáo
     </button>
+    <button class="nav-item" onclick="goPage('batch',this)" style="position:relative">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="4" rx="1"/><rect x="2" y="10" width="20" height="4" rx="1"/><rect x="2" y="17" width="20" height="4" rx="1"/></svg>
+      Quét hàng loạt
+      <span class="nav-badge" style="background:var(--safe);font-size:9px">MVP</span>
+    </button>
   </div>
 
   <div class="nav-sec">
@@ -379,10 +384,24 @@ textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 
       <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       Fintech / DeFi
     </button>
+    <button class="nav-item" onclick="goPage('daa',this)" style="color:var(--safe)">
+      <svg viewBox="0 0 24 24" style="stroke:currentColor;fill:none"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      DAA Crypto Market
+      <span class="nav-badge" style="background:var(--safe);font-size:9px">LIVE</span>
+    </button>
   </div>
 
   <div class="nav-sec">
     <div class="nav-lbl">Hệ thống</div>
+    <button class="nav-item" id="navUpgrade" onclick="goPage('upgrade',this)" style="background:linear-gradient(135deg,rgba(27,108,242,.08),rgba(77,142,247,.08));border:1px solid rgba(27,108,242,.2)">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Nâng cấp gói
+      <span class="nav-badge" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">HOT</span>
+    </button>
+    <button class="nav-item" onclick="goPage('banking',this)">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Liên kết ngân hàng
+    </button>
     <button class="nav-item" onclick="goPage('api',this)">
       <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       API & Tích hợp
@@ -394,9 +413,43 @@ textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 
   </div>
 
   <div class="sb-bottom">
+    <!-- Plan badge + usage -->
+    <div style="padding:10px 12px 8px;display:flex;align-items:center;justify-content:space-between">
+      <span id="sbPlanLabel" style="font-size:11px;font-weight:700;background:var(--brand-light);color:var(--brand);padding:3px 9px;border-radius:20px;cursor:pointer" onclick="goPage('upgrade',document.getElementById('navUpgrade'))">🆓 Free</span>
+      <span id="usageCounter" style="font-size:10px;color:var(--text-3);font-family:var(--mono)">0/50 lượt hôm nay</span>
+    </div>
+    <!-- Backend URL -->
+    <div style="padding:0 10px 6px">
+      <div style="font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">🖥 Backend (port 8080)</div>
+      <div style="position:relative">
+        <input id="backendUrlInput" type="text" placeholder="http://localhost:8080"
+          style="width:100%;padding:6px 30px 6px 8px;font-size:11px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);font-family:var(--mono);outline:none;transition:border-color .15s"
+          oninput="onBackendUrlChange(this)"
+          onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"/>
+        <div id="backendStatus" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:11px">⬜</div>
+      </div>
+    </div>
+    <!-- Claude API Key -->
+    <div style="padding:0 10px 8px">
+      <div style="position:relative">
+        <input id="claudeApiKey" type="password" placeholder="sk-ant-... (tuỳ chọn)" autocomplete="off"
+          style="width:100%;padding:7px 34px 7px 10px;font-size:11.5px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);font-family:var(--mono);outline:none;transition:border-color .15s"
+          oninput="onApiKeyChange(this)"
+          onfocus="this.style.borderColor='var(--brand)'"
+          onblur="this.style.borderColor='var(--border)'" />
+        <div id="apiKeyStatus" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:12px">🔑</div>
+      </div>
+      <div id="apiKeyHint" style="font-size:10px;color:var(--text-3);margin-top:3px;padding:0 2px;line-height:1.4">Nhập key riêng để dùng không giới hạn</div>
+    </div>
+    <!-- Upgrade button -->
+    <div style="padding:0 10px 10px">
+      <button onclick="goPage('upgrade',document.getElementById('navUpgrade'))" style="width:100%;padding:8px;font-size:12.5px;font-weight:600;background:linear-gradient(135deg,#1B6CF2,#4D8EF7);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        ⚡ Nâng cấp Pro
+      </button>
+    </div>
     <div class="sb-user" onclick="goPage('settings',document.querySelectorAll('.nav-item')[9])">
       <div class="sb-avatar">A</div>
-      <div><div class="sb-uname">Admin</div><div class="sb-urole">Super Admin</div></div>
+      <div><div class="sb-uname">Admin</div><div class="sb-urole" id="sbRoleLabel">Gói Free</div></div>
       <svg style="margin-left:auto;width:14px;height:14px;stroke:var(--text-3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
   </div>
@@ -821,6 +874,48 @@ console.log(data.result); <span class="code-cm">// "SCAM"</span>
     </div>
 
     <!-- ═══════════ PAGE: SETTINGS ═══════════ -->
+    <!-- MVP: BATCH SCAN PAGE -->
+    <div class="page" id="page-batch">
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Quét hàng loạt</h2>
+      <p style="font-size:13px;color:var(--text-3);margin-bottom:24px">Quét nhiều URL, số điện thoại, địa chỉ ví cùng một lúc (tối đa 20 mục)</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-l">
+              <div class="card-hd-ico"><svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
+              <div><div class="card-ttl">Danh sách cần quét</div><div class="card-sub">Mỗi mục một dòng</div></div>
+            </div>
+          </div>
+          <div style="padding:16px">
+            <textarea id="batchInput" rows="14" placeholder="Nhập mỗi mục một dòng, ví dụ:&#10;https://airdrop-fake.xyz&#10;0x1234abcd...&#10;0901234567&#10;Tôi trúng thưởng 50 triệu, nhấn link để nhận..." style="width:100%;padding:11px 13px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);font-family:var(--mono);resize:vertical;outline:none;line-height:1.6" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+            <div style="display:flex;gap:10px;margin-top:12px">
+              <button class="btn-pri" onclick="runBatchScan()" style="flex:1;padding:10px 16px;font-size:13.5px">
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:6px;vertical-align:middle"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Quét tất cả
+              </button>
+              <button onclick="document.getElementById('batchInput').value=''" style="padding:10px 14px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-2);cursor:pointer">Xóa</button>
+            </div>
+            <div style="margin-top:10px;padding:10px;background:var(--brand-light);border-radius:var(--r-sm);font-size:12px;color:var(--brand);line-height:1.6">
+              💡 <strong>Mẹo:</strong> Nhập Claude API key vào thanh bên trái để sử dụng AI thật. Không có key sẽ dùng phân tích offline.
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-l">
+              <div class="card-hd-ico"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div><div class="card-ttl">Kết quả quét</div><div class="card-sub">Tổng hợp theo thứ tự</div></div>
+            </div>
+          </div>
+          <div id="batchResults" style="padding:16px;min-height:200px">
+            <div style="padding:40px 0;text-align:center;color:var(--text-3)">
+              <svg viewBox="0 0 24 24" style="width:36px;height:36px;stroke:currentColor;fill:none;stroke-width:1.5;margin-bottom:10px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <p style="font-size:13px">Nhập danh sách và nhấn Quét để bắt đầu</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="page" id="page-settings">
       <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Cài đặt</h2>
       <p style="font-size:13px;color:var(--text-3);margin-bottom:24px">Tùy chỉnh hệ thống ScamShield theo nhu cầu của bạn</p>
@@ -872,6 +967,366 @@ console.log(data.result); <span class="code-cm">// "SCAM"</span>
             <button class="btn-sec" onclick="confirmAction('Xóa toàn bộ lịch sử quét?','Hành động này không thể hoàn tác.','clearHistory')">🗑️ Xóa lịch sử</button>
             <button class="btn-sec" onclick="confirmAction('Reset cài đặt về mặc định?','Tất cả tùy chỉnh sẽ bị mất.','resetSettings')">🔄 Reset cài đặt</button>
             <button class="btn-sec" style="color:var(--danger);border-color:var(--danger)" onclick="confirmAction('Xóa tài khoản?','Toàn bộ dữ liệu sẽ bị xóa vĩnh viễn.','deleteAccount')">⚠️ Xóa tài khoản</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TRANG NÂNG CẤP GÓI
+    ════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-upgrade">
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:6px">Chọn gói phù hợp</h2>
+      <p style="font-size:14px;color:var(--text-2);margin-bottom:28px">Nâng cấp để bảo vệ tốt hơn — không có quảng cáo, không gián đoạn</p>
+
+      <!-- Plans grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px">
+
+        <!-- FREE -->
+        <div id="planCardFree" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:24px;transition:box-shadow .2s">
+          <div style="font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Miễn phí</div>
+          <div style="font-size:32px;font-weight:800;line-height:1;margin-bottom:4px">0₫</div>
+          <div style="font-size:12px;color:var(--text-3);margin-bottom:20px">/ tháng · Mãi mãi</div>
+          <hr style="border:none;border-top:1px solid var(--border);margin-bottom:18px">
+          <ul style="list-style:none;font-size:13.5px;line-height:2;color:var(--text-2)">
+            <li>✅ 50 lượt AI phân tích / ngày</li>
+            <li>✅ Phân tích tin nhắn & URL</li>
+            <li>✅ Lịch sử 30 ngày</li>
+            <li>✅ Dashboard cơ bản</li>
+            <li style="color:var(--text-3)">❌ Quét hàng loạt</li>
+            <li style="color:var(--text-3)">❌ Liên kết ngân hàng</li>
+            <li style="color:var(--text-3)">❌ API access</li>
+            <li style="color:var(--text-3)">❌ Báo cáo PDF</li>
+          </ul>
+          <button id="btnPlanFree" onclick="selectPlan('free')" style="width:100%;margin-top:20px;padding:10px;font-size:13.5px;font-weight:600;border:2px solid var(--brand);border-radius:var(--r-sm);background:transparent;color:var(--brand);cursor:pointer">Gói hiện tại</button>
+        </div>
+
+        <!-- PRO - FEATURED -->
+        <div id="planCardPro" style="background:var(--surface);border:2px solid var(--brand);border-radius:var(--r);padding:24px;position:relative;box-shadow:0 8px 32px rgba(27,108,242,.15)">
+          <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1B6CF2,#4D8EF7);color:#fff;font-size:11px;font-weight:700;padding:4px 16px;border-radius:20px;white-space:nowrap">⭐ PHỔ BIẾN NHẤT</div>
+          <div style="font-size:12px;font-weight:700;color:var(--brand);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Pro</div>
+          <div style="font-size:32px;font-weight:800;line-height:1;margin-bottom:4px">99.000₫</div>
+          <div style="font-size:12px;color:var(--text-3);margin-bottom:20px">/ tháng · <span style="text-decoration:line-through;opacity:.6">199.000₫</span> <span style="color:var(--safe);font-weight:700">-50%</span></div>
+          <hr style="border:none;border-top:1px solid var(--border);margin-bottom:18px">
+          <ul style="list-style:none;font-size:13.5px;line-height:2;color:var(--text-2)">
+            <li>✅ <strong>1.000 lượt AI</strong> / ngày</li>
+            <li>✅ Phân tích mọi loại nội dung</li>
+            <li>✅ Lịch sử <strong>vĩnh viễn</strong></li>
+            <li>✅ Dashboard nâng cao + báo cáo</li>
+            <li>✅ <strong>Quét hàng loạt</strong> 100 mục</li>
+            <li>✅ <strong>Liên kết ngân hàng</strong></li>
+            <li>✅ API access (10k req/tháng)</li>
+            <li>✅ Xuất báo cáo PDF</li>
+          </ul>
+          <button id="btnPlanPro" onclick="selectPlan('pro')" style="width:100%;margin-top:20px;padding:10px;font-size:13.5px;font-weight:600;border:none;border-radius:var(--r-sm);background:linear-gradient(135deg,#1B6CF2,#4D8EF7);color:#fff;cursor:pointer">Nâng cấp Pro →</button>
+        </div>
+
+        <!-- ENTERPRISE -->
+        <div id="planCardEnterprise" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:24px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Enterprise</div>
+          <div style="font-size:32px;font-weight:800;line-height:1;margin-bottom:4px">Liên hệ</div>
+          <div style="font-size:12px;color:var(--text-3);margin-bottom:20px">/ tháng · Tuỳ chỉnh</div>
+          <hr style="border:none;border-top:1px solid var(--border);margin-bottom:18px">
+          <ul style="list-style:none;font-size:13.5px;line-height:2;color:var(--text-2)">
+            <li>✅ <strong>Không giới hạn</strong> lượt AI</li>
+            <li>✅ Triển khai on-premise</li>
+            <li>✅ SLA 99.9% uptime</li>
+            <li>✅ Hỗ trợ 24/7 riêng</li>
+            <li>✅ Tích hợp hệ thống nội bộ</li>
+            <li>✅ Whitelist domain công ty</li>
+            <li>✅ API không giới hạn</li>
+            <li>✅ Training AI theo dữ liệu riêng</li>
+          </ul>
+          <button id="btnPlanEnterprise" onclick="selectPlan('enterprise')" style="width:100%;margin-top:20px;padding:10px;font-size:13.5px;font-weight:600;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);cursor:pointer">Liên hệ tư vấn →</button>
+        </div>
+      </div>
+
+      <!-- So sánh chi tiết -->
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><div><div class="card-ttl">So sánh chi tiết</div></div></div></div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="background:var(--surface2)">
+                <th style="padding:12px 16px;text-align:left;font-weight:600;border-bottom:1px solid var(--border)">Tính năng</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;border-bottom:1px solid var(--border);color:var(--text-3)">Free</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;border-bottom:1px solid var(--border);color:var(--brand)">Pro</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;border-bottom:1px solid var(--border)">Enterprise</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${[
+                ['Lượt AI / ngày','50','1.000','Không giới hạn'],
+                ['Phân tích nội dung','✅','✅','✅'],
+                ['Lịch sử quét','30 ngày','Vĩnh viễn','Vĩnh viễn'],
+                ['Quét hàng loạt','❌','100 mục','1.000 mục'],
+                ['Liên kết ngân hàng','❌','✅','✅'],
+                ['API access','❌','10k req/tháng','Không giới hạn'],
+                ['Xuất báo cáo PDF','❌','✅','✅'],
+                ['Hỗ trợ','Community','Email priority','24/7 dedicated'],
+                ['SLA uptime','—','99.5%','99.9%'],
+              ].map(([f,a,b,c],i) => `<tr style="background:${i%2?'var(--surface2)':'var(--surface)'}">
+                <td style="padding:10px 16px;border-bottom:1px solid var(--border);font-weight:500">${f}</td>
+                <td style="padding:10px 16px;border-bottom:1px solid var(--border);text-align:center;color:var(--text-3)">${a}</td>
+                <td style="padding:10px 16px;border-bottom:1px solid var(--border);text-align:center;color:var(--brand);font-weight:600">${b}</td>
+                <td style="padding:10px 16px;border-bottom:1px solid var(--border);text-align:center">${c}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TRANG LIÊN KẾT NGÂN HÀNG
+    ════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-banking">
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Liên kết ngân hàng</h2>
+      <p style="font-size:13px;color:var(--text-3);margin-bottom:24px">Kết nối tài khoản ngân hàng để nhận cảnh báo giao dịch đáng ngờ theo thời gian thực</p>
+
+      <!-- Linked banks list -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-hd">
+          <div class="card-hd-l">
+            <div class="card-hd-ico"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+            <div><div class="card-ttl">Ngân hàng đã liên kết</div><div class="card-sub" id="linkedBankCount">0 tài khoản</div></div>
+          </div>
+          <button class="btn-txt" onclick="showAddBankModal()">+ Thêm ngân hàng</button>
+        </div>
+        <div id="linkedBanksList" style="padding:16px">
+          <div style="text-align:center;padding:32px 0;color:var(--text-3)">
+            <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:currentColor;fill:none;stroke-width:1.5;margin-bottom:10px"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <p style="font-size:13px;margin-bottom:12px">Chưa có ngân hàng nào được liên kết</p>
+            <button onclick="showAddBankModal()" style="padding:8px 20px;font-size:13px;font-weight:600;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">Liên kết ngân hàng đầu tiên</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supported banks grid -->
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="card-ttl">Ngân hàng được hỗ trợ</div><div class="card-sub">6 ngân hàng tại Việt Nam</div></div></div></div>
+        <div style="padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          ${[
+            {id:'vcb', name:'Vietcombank', short:'VCB', color:'#007B40', desc:'Ngân hàng TMCP Ngoại thương VN', hotline:'1800 545 413'},
+            {id:'bidv', name:'BIDV', short:'BIDV', color:'#1565C0', desc:'Ngân hàng Đầu tư & Phát triển VN', hotline:'1900 9247'},
+            {id:'vtb', name:'VietinBank', short:'CTG', color:'#FF6B00', desc:'Ngân hàng Công thương Việt Nam', hotline:'1800 588 880'},
+            {id:'tcb', name:'Techcombank', short:'TCB', color:'#CC0000', desc:'Ngân hàng TMCP Kỹ Thương VN', hotline:'1800 588 822'},
+            {id:'mb', name:'MBBank', short:'MBB', color:'#003087', desc:'Ngân hàng TMCP Quân đội', hotline:'1900 545 426'},
+            {id:'tpb', name:'TPBank', short:'TPB', color:'#7B1FA2', desc:'Ngân hàng TMCP Tiên Phong', hotline:'1900 585 885'},
+          ].map(b => `
+            <div onclick="showAddBankModal('${b.id}')" style="border:1.5px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;background:var(--surface)" onmouseover="this.style.borderColor='${b.color}';this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+              <div style="width:44px;height:44px;border-radius:10px;background:${b.color}15;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+                <span style="font-size:13px;font-weight:800;color:${b.color}">${b.short}</span>
+              </div>
+              <div style="font-size:13.5px;font-weight:700;margin-bottom:3px">${b.name}</div>
+              <div style="font-size:11px;color:var(--text-3);line-height:1.4;margin-bottom:8px">${b.desc}</div>
+              <div style="font-size:11px;color:var(--text-2);font-family:var(--mono)">${b.hotline}</div>
+              <div style="margin-top:10px;font-size:11.5px;font-weight:600;color:${b.color}">Kết nối →</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Alert settings for banks -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico" style="background:var(--warn-bg);color:var(--warn)"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="card-ttl">Cài đặt cảnh báo giao dịch</div><div class="card-sub">Khi nào AI sẽ cảnh báo bạn</div></div></div></div>
+        <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          ${[
+            ['Giao dịch vượt ngưỡng', '> 5,000,000₫', true],
+            ['Chuyển khoản đêm khuya', '22:00 – 05:00', true],
+            ['Tài khoản nhận lạ', 'Chưa từng giao dịch', true],
+            ['Giao dịch dồn dập', '>5 lần / 10 phút', false],
+            ['Địa chỉ IP nước ngoài', 'Ngoài Việt Nam', true],
+            ['Số tiền tròn đáng ngờ', 'VD: 500k, 1tr, 2tr', false],
+          ].map(([label, desc, checked]) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:var(--r-sm)">
+              <div>
+                <div style="font-size:13px;font-weight:500">${label}</div>
+                <div style="font-size:11.5px;color:var(--text-3);margin-top:2px">${desc}</div>
+              </div>
+              <label class="toggle"><input type="checkbox" ${checked?'checked':''} onchange="saveSetting('bank_${label}',this.checked)"><span class="toggle-slider"></span></label>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TRANG DAA CRYPTO MARKET — TÍCH HỢP API DAATHENA.COM
+    ════════════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-daa">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">DAA Crypto Market</h2>
+          <p style="font-size:13px;color:var(--text-3)">Dữ liệu thị trường thật từ <a href="https://daathena.com" target="_blank" style="color:var(--brand)">daathena.com</a> — phát hiện giả mạo token, kiểm tra giá thật</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="daaConnStatus" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);background:var(--surface2);padding:6px 12px;border-radius:var(--r-sm);border:1px solid var(--border)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--text-3);display:inline-block" id="daaStatusDot"></span>
+            <span id="daaStatusText">Chưa kết nối</span>
+          </div>
+          <button onclick="goPage('daa-setup', document.querySelector('[onclick*=daa-setup]'))" style="padding:7px 14px;font-size:12.5px;font-weight:600;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">⚙️ Cài đặt API</button>
+        </div>
+      </div>
+
+      <!-- DAA Setup Card -->
+      <div class="card" style="margin-bottom:18px">
+        <div style="padding:16px 18px 0">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <!-- API Key -->
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">
+                🔑 DAA API Key
+              </label>
+              <input id="daaApiKeyInput" type="password"
+                placeholder="Dán key từ daathena.com/vi/settings/api-keys"
+                style="width:100%;padding:8px 12px;font-size:12.5px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);font-family:var(--mono);outline:none"
+                onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"
+                oninput="onDaaKeyChange(this)">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <button onclick="testDaaConnection()" style="padding:8px 16px;font-size:12.5px;font-weight:600;background:var(--safe);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">🔌 Test kết nối</button>
+            <button onclick="loadDaaMarket()" style="padding:8px 16px;font-size:12.5px;font-weight:600;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">📊 Tải thị trường</button>
+            <button onclick="clearDaaConfig()" style="padding:8px 12px;font-size:12px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;color:var(--text-2);cursor:pointer">🗑 Xóa cấu hình</button>
+          </div>
+        </div>
+
+        <!-- Error banner (ẩn mặc định) -->
+        <div id="daaErrorBanner" style="display:none;margin:0 18px 14px;border-radius:var(--r-sm);overflow:hidden">
+          <div style="background:var(--danger-bg);padding:12px 14px;border:1px solid rgba(229,57,53,.25)">
+            <div style="font-size:13px;font-weight:700;color:var(--danger);margin-bottom:8px">❌ <span id="daaErrorMsg">Lỗi kết nối</span></div>
+            <div id="daaFixWhitelist" style="display:none;font-size:12.5px;color:var(--text-2);line-height:1.8">
+              <strong>Lỗi "Host not in allowlist"</strong> — DAA API chặn IP chưa được đăng ký.<br>
+              Chọn 1 trong 2 cách dưới:
+            </div>
+          </div>
+          <!-- Fix steps -->
+          <div id="daaFixSteps" style="display:none;background:var(--surface2);border:1px solid var(--border);border-top:none;padding:14px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div style="background:var(--surface);border:1.5px solid var(--safe);border-radius:var(--r-sm);padding:12px">
+                <div style="font-size:12.5px;font-weight:700;color:var(--safe);margin-bottom:6px">✅ Cách 1 — Whitelist IP (0 code)</div>
+                <ol style="font-size:12px;color:var(--text-2);padding-left:16px;line-height:2;margin:0">
+                  <li>Vào <a href="https://daathena.com/vi/settings/api-keys" target="_blank" style="color:var(--brand)">DAA Settings → API Keys</a></li>
+                  <li>Chỉnh sửa API key của bạn</li>
+                  <li>Tìm ô <strong>IP Whitelist</strong></li>
+                  <li>Thêm IP server/máy tính của bạn</li>
+                  <li>Nhấn Test kết nối lại</li>
+                </ol>
+                <div style="font-size:11px;color:var(--text-3);margin-top:6px">IP hiện tại của bạn: <span id="myPublicIp" style="font-family:var(--mono)">đang lấy...</span></div>
+              </div>
+              <div style="background:var(--surface);border:1.5px solid var(--brand);border-radius:var(--r-sm);padding:12px">
+                <div style="font-size:12.5px;font-weight:700;color:var(--brand);margin-bottom:6px">⚡ Cách 2 — Proxy Server (local)</div>
+                <ol style="font-size:12px;color:var(--text-2);padding-left:16px;line-height:2;margin:0">
+                  <li>Tải file <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">daa-proxy-server.js</code></li>
+                  <li>Chạy: <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">npm i express cors && node daa-proxy-server.js</code></li>
+                  <li>Điền <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">http://localhost:3001/proxy</code> vào ô Proxy URL bên trên</li>
+                  <li>Nhấn Test kết nối lại</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+          <!-- Proxy offline fix -->
+          <div id="daaFixProxy" style="display:none;background:var(--surface2);border:1px solid var(--border);border-top:none;padding:14px;font-size:12.5px;color:var(--text-2);line-height:1.8">
+            <strong>Proxy server chưa chạy</strong> hoặc sai URL.<br>
+            Mở terminal và chạy: <code style="background:var(--surface);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:12px">node daa-proxy-server.js</code>
+            rồi đảm bảo Proxy URL là <code style="background:var(--surface);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:12px">http://localhost:3001/proxy</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Scam Check với giá thật -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-l">
+              <div class="card-hd-ico" style="background:var(--danger-bg);color:var(--danger)"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+              <div><div class="card-ttl">Kiểm tra token/coin giả mạo</div><div class="card-sub">So sánh giá thật từ DAA</div></div>
+            </div>
+          </div>
+          <div style="padding:14px 16px">
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <input id="daaScamSymbol" type="text" placeholder="VD: BTC, ETH, USDT..." style="flex:1;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);outline:none;font-family:var(--mono);text-transform:uppercase" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'">
+              <button onclick="checkTokenScam()" style="padding:8px 14px;font-size:13px;font-weight:600;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">Kiểm tra</button>
+            </div>
+            <div id="daaScamResult" style="min-height:60px;font-size:13px;color:var(--text-3);display:flex;align-items:center;justify-content:center">
+              Nhập mã token để kiểm tra giá thật
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-l">
+              <div class="card-hd-ico"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+              <div><div class="card-ttl">BTC/USDT — Giá thật</div><div class="card-sub" id="daaBtcTime">Chưa cập nhật</div></div>
+            </div>
+            <button onclick="refreshBtcTicker()" style="padding:5px 10px;font-size:11.5px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;cursor:pointer;color:var(--text-2)">🔄 Refresh</button>
+          </div>
+          <div style="padding:14px 16px">
+            <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
+              <div id="daaBtcPrice" style="font-size:28px;font-weight:800;font-family:var(--mono);color:var(--text-1)">—</div>
+              <div id="daaBtcChange" style="font-size:13px;font-weight:600">—</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div style="background:var(--surface2);padding:8px;border-radius:var(--r-sm)">
+                <div style="font-size:10px;color:var(--text-3)">Cao nhất 24h</div>
+                <div id="daaBtcHigh" style="font-size:12.5px;font-weight:600;font-family:var(--mono)">—</div>
+              </div>
+              <div style="background:var(--surface2);padding:8px;border-radius:var(--r-sm)">
+                <div style="font-size:10px;color:var(--text-3)">Thấp nhất 24h</div>
+                <div id="daaBtcLow" style="font-size:12.5px;font-weight:600;font-family:var(--mono)">—</div>
+              </div>
+              <div style="background:var(--surface2);padding:8px;border-radius:var(--r-sm)">
+                <div style="font-size:10px;color:var(--text-3)">Khối lượng</div>
+                <div id="daaBtcVol" style="font-size:12.5px;font-weight:600;font-family:var(--mono)">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Market list -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-l">
+            <div class="card-hd-ico"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+            <div><div class="card-ttl">Danh sách Currency từ DAA</div><div class="card-sub" id="daaCurrencyCount">Nhấn "Tải thị trường" để xem</div></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="daaSearchInput" type="text" placeholder="Tìm coin..." style="padding:6px 10px;font-size:12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);outline:none;width:130px" oninput="filterDaaList(this.value)">
+          </div>
+        </div>
+        <div id="daaMarketList" style="max-height:400px;overflow-y:auto">
+          <div style="padding:40px;text-align:center;color:var(--text-3)">
+            <svg viewBox="0 0 24 24" style="width:36px;height:36px;stroke:currentColor;fill:none;stroke-width:1.5;margin-bottom:10px"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <p style="font-size:13px;margin-bottom:12px">Cần nhập API Key và nhấn "Tải thị trường"</p>
+            <p style="font-size:12px">Lấy key tại <a href="https://daathena.com/vi/settings/api-keys" target="_blank" style="color:var(--brand)">daathena.com</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order book section -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-l">
+              <div class="card-hd-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg></div>
+              <div><div class="card-ttl">Orderbook BTC/USDT</div><div class="card-sub">Bids & Asks thời gian thực</div></div>
+            </div>
+            <button onclick="loadOrderbook('btcusdt')" style="padding:5px 10px;font-size:11.5px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;cursor:pointer;color:var(--text-2)">🔄</button>
+          </div>
+          <div style="padding:0 0 4px">
+            <div style="display:grid;grid-template-columns:1fr 1fr">
+              <div style="padding:10px 16px">
+                <div style="font-size:11px;font-weight:700;color:var(--safe);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Bids (Mua)</div>
+                <div id="daaBids" style="font-size:12px;font-family:var(--mono);color:var(--text-2);line-height:2">—</div>
+              </div>
+              <div style="padding:10px 16px;border-left:1px solid var(--border)">
+                <div style="font-size:11px;font-weight:700;color:var(--danger);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Asks (Bán)</div>
+                <div id="daaAsks" style="font-size:12px;font-family:var(--mono);color:var(--text-2);line-height:2">—</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -954,6 +1409,38 @@ console.log(data.result); <span class="code-cm">// "SCAM"</span>
     <div class="modal-acts">
       <button class="btn-sec" onclick="closeModal()">Hủy</button>
       <button class="btn-pri" id="modalConfirm" style="background:var(--danger)">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- BANK LINK MODAL -->
+<div id="bankModalOverlay" onclick="closeBankModal(event)" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:var(--r);width:480px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18)">
+    <div style="padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:16px">
+      <div>
+        <div style="font-size:16px;font-weight:700" id="bankModalTitle">🏦 Liên kết ngân hàng</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:3px">Kết nối an toàn qua Open Banking API</div>
+      </div>
+      <div onclick="closeBankModal()" style="cursor:pointer;font-size:20px;color:var(--text-3);line-height:1;padding:4px">×</div>
+    </div>
+    <div style="padding:20px 24px" id="bankModalBody">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE PAYMENT MODAL -->
+<div id="upgradeModalOverlay" onclick="closeUpgradeModal(event)" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:var(--r);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18)">
+    <div style="padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:16px;font-weight:700" id="upgradeModalTitle">⚡ Nâng cấp Pro</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:3px">Thanh toán an toàn qua ngân hàng Việt Nam</div>
+      </div>
+      <div onclick="closeUpgradeModal()" style="cursor:pointer;font-size:20px;color:var(--text-3);line-height:1;padding:4px">×</div>
+    </div>
+    <div style="padding:20px 24px" id="upgradeModalBody">
+      <!-- Populated by JS -->
     </div>
   </div>
 </div>
@@ -1114,9 +1601,1008 @@ const SCAM_RULES = {
   ]
 };
 
-async function callClaudeAI(content, context) {
-  return await analyzeScamOffline(content, context);
+// ─── MVP: REAL CLAUDE AI ENGINE ─────────────────────────────────────────────
+// Default API key — người dùng Free Plan dùng key chung (giới hạn 50 lượt/ngày)
+const DEFAULT_CLAUDE_KEY = 'sk-ant-api03-placeholder-replace-with-real-key';
+
+// Lấy key theo thứ tự ưu tiên: user nhập > default builtin
+function getActiveApiKey() {
+  const userKey = (document.getElementById('claudeApiKey')?.value || '').trim();
+  if (userKey.startsWith('sk-ant-') && userKey.length > 20) return userKey;
+  if (DEFAULT_CLAUDE_KEY.startsWith('sk-ant-') && !DEFAULT_CLAUDE_KEY.includes('placeholder')) return DEFAULT_CLAUDE_KEY;
+  return null;
 }
+
+async function callClaudeAI(content, context) {
+  // Ưu tiên: Backend Python (port 8080) → Claude API → Offline
+  const backendUrl = localStorage.getItem('ss_backend_url') || '';
+
+  if (backendUrl) {
+    try {
+      return await callBackendAnalyze(content, context, backendUrl);
+    } catch(e) {
+      console.warn('Backend lỗi, fallback Claude API:', e.message);
+    }
+  }
+
+  // Dùng Claude API key nếu có
+  const apiKey = getActiveApiKey();
+  if (!apiKey) {
+    return await analyzeScamOffline(content, context);
+  }
+  const plan = getUserPlan();
+  if (plan === 'free') {
+    const todayUsage = getDailyUsage();
+    if (todayUsage >= 50) {
+      return '⚠️ BẠN ĐÃ HẾT LƯỢT MIỄN PHÍ HÔM NAY (50/50)\n\n📋 Phân tích:\n• Gói Free giới hạn 50 lượt phân tích AI thật mỗi ngày\n• Lượt sẽ được reset lúc 00:00 hàng ngày\n\n💡 Khuyến nghị:\n• Nâng cấp lên gói Pro để dùng không giới hạn\n• Hoặc nhập API key Anthropic của bạn vào thanh bên\n\n🔍 LOẠI: Hạn chế gói dịch vụ';
+    }
+    incrementDailyUsage();
+  }
+  try {
+    return await callClaudeAPIReal(content, context, apiKey);
+  } catch(e) {
+    return await analyzeScamOffline(content, context);
+  }
+}
+
+// Gọi backend Python /analyze hoặc /check
+async function callBackendAnalyze(content, context, backendUrl) {
+  const resp = await fetch(backendUrl + '/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ note: content, amount: 0 })
+  });
+  if (!resp.ok) throw new Error('Backend HTTP ' + resp.status);
+  const d = await resp.json();
+
+  const riskScore = d.risk_score || 0;
+  const level     = d.risk_level || 'SAFE';
+  const levelMap  = { CRITICAL: '🚨 CẢNH BÁO SCAM', HIGH: '⚠️ CẦN CHÚ Ý', MEDIUM: '⚡ Đáng ngờ', SAFE: '✅ AN TOÀN' };
+  const prefix    = levelMap[level] || '✅ AN TOÀN';
+
+  return `${prefix} (Risk: ${riskScore.toFixed(0)}%)
+
+📋 Phân tích:
+• Điểm rủi ro: ${riskScore.toFixed(1)}/100
+• Điểm tin cậy: ${(d.trust_score||0).toFixed(1)}/100
+• Mức độ: ${level}
+• Phân tích bởi: Backend Python${d.ml_used ? ' + ML' : ' (rule-based)'}
+
+💡 Khuyến nghị:
+• ${riskScore > 60 ? 'Không thực hiện giao dịch này' : 'Vẫn cần xác minh trước khi chuyển tiền'}`;
+}
+
+// Quản lý plan người dùng
+function getUserPlan() {
+  try { return localStorage.getItem('ss_user_plan') || 'free'; } catch(e) { return 'free'; }
+}
+function setUserPlan(plan) {
+  try { localStorage.setItem('ss_user_plan', plan); updatePlanUI(); } catch(e) {}
+}
+function getDailyUsage() {
+  try {
+    const d = localStorage.getItem('ss_daily_usage');
+    if (!d) return 0;
+    const { date, count } = JSON.parse(d);
+    if (date !== new Date().toDateString()) return 0;
+    return count;
+  } catch(e) { return 0; }
+}
+function incrementDailyUsage() {
+  try {
+    const count = getDailyUsage() + 1;
+    localStorage.setItem('ss_daily_usage', JSON.stringify({ date: new Date().toDateString(), count }));
+    updateUsageUI();
+  } catch(e) {}
+}
+function updateUsageUI() {
+  const used = getDailyUsage(), plan = getUserPlan();
+  const limit = plan === 'free' ? 50 : plan === 'pro' ? 1000 : 999999;
+  const el = document.getElementById('usageCounter');
+  if (el) el.textContent = `${used}/${limit === 999999 ? '∞' : limit} lượt hôm nay`;
+}
+function updatePlanUI() {
+  const plan = getUserPlan();
+  const labels = { free: '🆓 Free', pro: '⚡ Pro', enterprise: '🏢 Enterprise' };
+  const el = document.getElementById('sbPlanLabel');
+  if (el) el.textContent = labels[plan] || '🆓 Free';
+  updateUsageUI();
+}
+
+async function callClaudeAPIReal(content, context, apiKey) {
+  const systemPrompt = `Bạn là AI chuyên phát hiện lừa đảo (scam) trực tuyến tại Việt Nam.
+Nhiệm vụ: Phân tích nội dung người dùng gửi và xác định mức độ rủi ro lừa đảo.
+
+Quy tắc phân loại:
+- SCAM (nguy hiểm cao): Rõ ràng là lừa đảo — giả mạo ngân hàng, yêu cầu seed phrase/private key, giveaway giả, đầu tư đảm bảo lợi nhuận cao, chiêu gửi tiền nhận lại nhiều hơn
+- CẢNH BÁO (đáng ngờ): Có dấu hiệu lừa đảo nhưng chưa chắc chắn — URL đáng ngờ, yêu cầu khẩn cấp, lời hứa phi thực tế
+- AN TOÀN: Không có dấu hiệu lừa đảo
+
+Định dạng trả lời BẮT BUỘC (đúng y hệt):
+
+[KẾT LUẬN: SCAM|CẦN CHÚ Ý|AN TOÀN]
+[RỦI RO: 0-100]
+
+📋 PHÂN TÍCH:
+• [lý do 1]
+• [lý do 2]
+• [lý do 3 nếu có]
+
+💡 KHUYẾN NGHỊ:
+• [hành động 1]
+• [hành động 2]
+
+🔍 LOẠI: [Phishing URL|Giả mạo ngân hàng|Đầu tư lừa đảo|Giả mạo cơ quan|Crypto scam|Không xác định]
+
+Trả lời ngắn gọn, súc tích. Viết bằng tiếng Việt.`;
+
+  const userMsg = `Hãy kiểm tra nội dung sau (ngữ cảnh: ${context}):\n\n"${content}"`;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 800,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `HTTP ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  const text = data.content?.[0]?.text || '';
+
+  // Map structured response to emoji-prefixed result
+  const riskMatch = text.match(/\[RỦI RO:\s*(\d+)\]/);
+  const conclusionMatch = text.match(/\[KẾT LUẬN:\s*(SCAM|CẦN CHÚ Ý|AN TOÀN)\]/);
+  const riskVal = riskMatch ? parseInt(riskMatch[1]) : 50;
+  const conclusion = conclusionMatch?.[1] || (riskVal >= 60 ? 'SCAM' : riskVal >= 30 ? 'CẦN CHÚ Ý' : 'AN TOÀN');
+
+  const cleanText = text
+    .replace(/\[KẾT LUẬN:[^\]]+\]/g, '')
+    .replace(/\[RỦI RO:[^\]]+\]/g, '')
+    .trim();
+
+  const prefix = conclusion === 'SCAM'
+    ? `🚨 CẢNH BÁO SCAM (Rủi ro: ${riskVal}%)\n\n`
+    : conclusion === 'CẦN CHÚ Ý'
+    ? `⚠️ CẦN CHÚ Ý (Rủi ro: ${riskVal}%)\n\n`
+    : `✅ AN TOÀN (Rủi ro: ${riskVal}%)\n\n`;
+
+  return prefix + cleanText;
+}
+
+// ─── MVP: BATCH SCAN ─────────────────────────────────────────────────────────
+async function runBatchScan() {
+  const raw = document.getElementById('batchInput')?.value?.trim();
+  if (!raw) { toast('⚠️ Vui lòng nhập danh sách cần quét'); return; }
+  const items = raw.split('\n').map(s => s.trim()).filter(Boolean);
+  if (items.length > 20) { toast('⚠️ Tối đa 20 mục mỗi lần quét'); return; }
+
+  const resultsEl = document.getElementById('batchResults');
+  resultsEl.innerHTML = `<div style="padding:16px;color:var(--text-3);font-size:13px">⏳ Đang quét ${items.length} mục...</div>`;
+
+  const results = [];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    resultsEl.innerHTML = `<div style="padding:16px;color:var(--text-3);font-size:13px">⏳ Đang quét ${i+1}/${items.length}: ${item.slice(0,40)}...</div>`;
+    try {
+      const res = await callClaudeAI(item, 'batch scan');
+      const type = detectType(res);
+      results.push({ item, res, type });
+      pushHistory(item.slice(0, 45) + (item.length > 45 ? '...' : ''), type, res);
+      updateKPIs(type);
+    } catch (e) {
+      results.push({ item, res: 'Lỗi: ' + e.message, type: 'warn' });
+    }
+  }
+
+  const icons = { safe: '✅', danger: '🚨', warn: '⚠️' };
+  const labels = { safe: 'AN TOÀN', danger: 'SCAM', warn: 'CẢNH BÁO' };
+  resultsEl.innerHTML = results.map((r, i) => `
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;background:${r.type==='danger'?'var(--danger-bg)':r.type==='safe'?'var(--safe-bg)':'var(--warn-bg)'}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:14px">${icons[r.type]}</span>
+        <span style="font-size:12px;font-weight:700;color:${r.type==='danger'?'var(--danger)':r.type==='safe'?'var(--safe)':'var(--warn)'}">${labels[r.type]}</span>
+        <span style="font-size:11px;color:var(--text-3);font-family:var(--mono);margin-left:auto">#${i+1}</span>
+      </div>
+      <div style="font-size:12.5px;font-weight:600;margin-bottom:4px;word-break:break-all">${r.item}</div>
+      <div style="font-size:12px;color:var(--text-2);line-height:1.5;max-height:60px;overflow:hidden;-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical">${r.res.replace(/\n/g,' ')}</div>
+    </div>`).join('');
+
+  const scamCount = results.filter(r => r.type === 'danger').length;
+  toast(`✅ Quét xong: ${scamCount} SCAM, ${results.filter(r=>r.type==='safe').length} AN TOÀN, ${results.filter(r=>r.type==='warn').length} CẢNH BÁO`);
+}
+
+// ─── MVP: HISTORY PERSISTENCE ────────────────────────────────────────────────
+function saveHistoryToStorage() {
+  try { localStorage.setItem('ss_history', JSON.stringify(history.slice(0, 100))); } catch(e) {}
+}
+
+function loadHistoryFromStorage() {
+  try {
+    const saved = localStorage.getItem('ss_history');
+    if (saved) {
+      const loaded = JSON.parse(saved);
+      loaded.forEach(h => {
+        history.push(h);
+        const list = document.getElementById('histList');
+        if (list && list.children.length < 6) {
+          const badges = {safe:'AN TOÀN', danger:'SCAM', warn:'CẢNH BÁO'};
+          const el = document.createElement('div');
+          el.className = 'hist-item';
+          el.innerHTML = `<div class="h-dot ${h.type}"></div><div class="h-txt"><div class="h-msg">${h.msg}</div><div class="h-time">${h.time}</div></div><span class="h-badge ${h.type}">${badges[h.type]}</span>`;
+          el.onclick = () => showHistDetail(h.msg, h.type, h.detail);
+          list.appendChild(el);
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+// ─── PLAN SELECTION ────────────────────────────────────────────────────────
+const BANK_INFO = {
+  vcb:  { name:'Vietcombank', acc:'1014368268', owner:'CONG TY SCAMSHIELD', bin:'970436', color:'#007B40' },
+  bidv: { name:'BIDV',        acc:'31410003148689', owner:'CONG TY SCAMSHIELD', bin:'970418', color:'#1565C0' },
+  vtb:  { name:'VietinBank',  acc:'104868209514', owner:'CONG TY SCAMSHIELD', bin:'970415', color:'#FF6B00' },
+  tcb:  { name:'Techcombank', acc:'19036868268', owner:'CONG TY SCAMSHIELD', bin:'970407', color:'#CC0000' },
+  mb:   { name:'MBBank',      acc:'0986868268', owner:'CONG TY SCAMSHIELD', bin:'970422', color:'#003087' },
+  tpb:  { name:'TPBank',      acc:'02868268268', owner:'CONG TY SCAMSHIELD', bin:'970423', color:'#7B1FA2' },
+};
+
+const PLAN_PRICE = { pro: 99000, enterprise: 0 };
+const PLAN_LABEL = { free:'Miễn phí', pro:'Pro — 99.000₫/tháng', enterprise:'Enterprise' };
+
+function selectPlan(plan) {
+  if (plan === 'free') {
+    setUserPlan('free');
+    toast('✅ Bạn đang dùng gói Free');
+    return;
+  }
+  if (plan === 'enterprise') {
+    openModal('📞 Liên hệ Enterprise', 'Vui lòng liên hệ:\n📧 sales@scamshield.vn\n📞 0909 868 268\n\nHoặc để lại thông tin tư vấn qua trang web.', null);
+    return;
+  }
+  // Pro — show payment modal
+  showUpgradeModal(plan);
+}
+
+function showUpgradeModal(plan) {
+  const price = PLAN_PRICE[plan];
+  const txCode = 'SS' + Date.now().toString().slice(-8);
+  const defaultBank = 'vcb';
+  const bk = BANK_INFO[defaultBank];
+
+  document.getElementById('upgradeModalTitle').textContent = `⚡ Nâng cấp ${plan === 'pro' ? 'Pro' : 'Enterprise'}`;
+  document.getElementById('upgradeModalBody').innerHTML = `
+    <div style="background:var(--brand-light);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:18px;font-size:13px;color:var(--brand)">
+      🎉 <strong>Giảm 50%</strong> — Chỉ còn <strong>${price.toLocaleString('vi-VN')}₫/tháng</strong> trong hôm nay!
+    </div>
+
+    <!-- Bank selector -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:600;color:var(--text-3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Chọn ngân hàng nhận tiền</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="payBankTabs">
+        ${Object.entries(BANK_INFO).map(([id, b]) => `
+          <button onclick="switchPayBank('${id}','${plan}','${txCode}')" id="payTab_${id}"
+            style="padding:6px 12px;font-size:12px;font-weight:600;border-radius:var(--r-sm);border:2px solid ${id===defaultBank?b.color:'var(--border)'};background:${id===defaultBank?b.color+'15':'transparent'};color:${id===defaultBank?b.color:'var(--text-2)'};cursor:pointer;transition:all .15s">
+            ${b.name}
+          </button>`).join('')}
+      </div>
+    </div>
+
+    <!-- Payment info -->
+    <div id="payInfo_${defaultBank}" style="border:1.5px solid ${bk.color}30;border-radius:var(--r);padding:18px;background:${bk.color}08">
+      ${buildPaymentInfo(defaultBank, price, txCode)}
+    </div>
+
+    <!-- QR + instructions -->
+    <div style="margin-top:16px;padding:14px;background:var(--surface2);border-radius:var(--r-sm);font-size:12.5px;color:var(--text-2);line-height:2">
+      <div style="font-weight:600;margin-bottom:6px;font-size:13px">📋 Hướng dẫn thanh toán:</div>
+      <div>1️⃣ Chuyển khoản đúng số tiền <strong>${price.toLocaleString('vi-VN')}₫</strong></div>
+      <div>2️⃣ Nội dung chuyển khoản: <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px">${txCode}</code></div>
+      <div>3️⃣ Hệ thống tự động kích hoạt trong <strong>1-5 phút</strong></div>
+      <div>4️⃣ Nhấn <strong>"Tôi đã chuyển khoản"</strong> sau khi thanh toán</div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button onclick="confirmPlanPayment('${plan}','${txCode}')" style="flex:1;padding:12px;font-size:14px;font-weight:700;background:linear-gradient(135deg,#1B6CF2,#4D8EF7);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">✅ Tôi đã chuyển khoản</button>
+      <button onclick="closeUpgradeModal()" style="padding:12px 18px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;cursor:pointer">Hủy</button>
+    </div>
+  `;
+
+  document.getElementById('upgradeModalOverlay').style.display = 'flex';
+}
+
+function buildPaymentInfo(bankId, price, txCode) {
+  const b = BANK_INFO[bankId];
+  const qrUrl = `https://img.vietqr.io/image/${b.bin}-${b.acc}-compact2.jpg?amount=${price}&addInfo=${txCode}&accountName=${encodeURIComponent(b.owner)}`;
+  return `
+    <div style="display:flex;gap:16px;align-items:flex-start">
+      <img src="${qrUrl}" alt="QR ${b.name}" style="width:130px;height:130px;border-radius:8px;border:2px solid ${b.color}30;flex-shrink:0" onerror="this.style.display='none'">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;color:${b.color};margin-bottom:10px">${b.name}</div>
+        ${[
+          ['Số tài khoản', b.acc],
+          ['Chủ tài khoản', b.owner],
+          ['Số tiền', price.toLocaleString('vi-VN') + '₫'],
+          ['Nội dung CK', txCode],
+        ].map(([label, val]) => `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+            <span style="font-size:12px;color:var(--text-3)">${label}</span>
+            <span style="font-size:12.5px;font-weight:600;font-family:var(--mono);cursor:pointer" onclick="navigator.clipboard.writeText('${val}').then(()=>toast('📋 Đã sao chép: ${label}'))">${val} 📋</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function switchPayBank(bankId, plan, txCode) {
+  const price = PLAN_PRICE[plan];
+  // Update tabs
+  Object.keys(BANK_INFO).forEach(id => {
+    const tab = document.getElementById('payTab_' + id);
+    if (!tab) return;
+    const b = BANK_INFO[id];
+    if (id === bankId) {
+      tab.style.borderColor = b.color;
+      tab.style.background = b.color + '15';
+      tab.style.color = b.color;
+    } else {
+      tab.style.borderColor = 'var(--border)';
+      tab.style.background = 'transparent';
+      tab.style.color = 'var(--text-2)';
+    }
+  });
+  // Update payment info
+  const bk = BANK_INFO[bankId];
+  const container = document.getElementById('upgradeModalBody').querySelector('[id^="payInfo_"]');
+  if (container) {
+    container.id = 'payInfo_' + bankId;
+    container.style.borderColor = bk.color + '30';
+    container.style.background = bk.color + '08';
+    container.innerHTML = buildPaymentInfo(bankId, price, txCode);
+  }
+}
+
+function confirmPlanPayment(plan, txCode) {
+  closeUpgradeModal();
+  // Simulate activation (in production: verify via webhook)
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:300;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `
+    <div style="background:var(--surface);border-radius:var(--r);padding:32px;text-align:center;max-width:360px;width:90%">
+      <div style="font-size:48px;margin-bottom:16px">🎉</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Đang xác nhận thanh toán</div>
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Mã giao dịch: <strong>${txCode}</strong><br>Hệ thống sẽ tự động kích hoạt gói <strong>${PLAN_LABEL[plan]}</strong> trong 1-5 phút.</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:20px">Nếu sau 10 phút chưa nhận được, liên hệ:<br><strong>support@scamshield.vn</strong></div>
+      <button onclick="this.closest('[style*=fixed]').remove();activatePlanDemo('${plan}')" style="padding:10px 28px;font-size:14px;font-weight:600;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">Kích hoạt Demo (Test)</button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function activatePlanDemo(plan) {
+  setUserPlan(plan);
+  const el = document.getElementById('sbRoleLabel');
+  if (el) el.textContent = plan === 'pro' ? 'Gói Pro ⚡' : 'Enterprise 🏢';
+  // Update plan card buttons
+  updatePlanCards();
+  toast(`🎉 Đã kích hoạt gói ${PLAN_LABEL[plan]}! Chào mừng bạn!`);
+}
+
+function updatePlanCards() {
+  const plan = getUserPlan();
+  const configs = {
+    free: { btnId: 'btnPlanFree', text: 'Gói hiện tại', disabled: true, style: 'border:2px solid var(--brand);background:transparent;color:var(--brand)' },
+    pro:  { btnId: 'btnPlanPro', text: '✅ Đang dùng', disabled: true, style: 'background:var(--safe);' },
+    enterprise: { btnId: 'btnPlanEnterprise', text: '✅ Đang dùng', disabled: true, style: 'background:var(--text-1);color:#fff;border:none' },
+  };
+  // Reset all
+  ['free','pro','enterprise'].forEach(p => {
+    const defaults = {
+      free: 'border:2px solid var(--brand);background:transparent;color:var(--brand)',
+      pro: 'border:none;background:linear-gradient(135deg,#1B6CF2,#4D8EF7);color:#fff',
+      enterprise: 'border:1.5px solid var(--border);background:var(--surface2);color:var(--text-1)',
+    };
+    const defaultTexts = { free: 'Gói hiện tại', pro: 'Nâng cấp Pro →', enterprise: 'Liên hệ tư vấn →' };
+    const btn = document.getElementById('btnPlan' + p.charAt(0).toUpperCase() + p.slice(1));
+    if (btn) {
+      btn.setAttribute('style', btn.getAttribute('style').replace(/width:100%;margin-top:20px;.*$/, '') + `width:100%;margin-top:20px;padding:10px;font-size:13.5px;font-weight:600;border-radius:var(--r-sm);cursor:pointer;${defaults[p]}`);
+      btn.textContent = defaultTexts[p];
+      btn.disabled = false;
+    }
+  });
+  if (configs[plan]) {
+    const btn = document.getElementById(configs[plan].btnId);
+    if (btn) {
+      btn.textContent = configs[plan].text;
+      btn.disabled = configs[plan].disabled;
+    }
+  }
+}
+
+function closeUpgradeModal(e) {
+  if (!e || e.target === document.getElementById('upgradeModalOverlay'))
+    document.getElementById('upgradeModalOverlay').style.display = 'none';
+}
+
+// ─── BANK LINKING ────────────────────────────────────────────────────────────
+let linkedBanks = [];
+
+function showAddBankModal(preselect) {
+  const plan = getUserPlan();
+  if (plan === 'free') {
+    openModal('🔒 Tính năng Pro', 'Liên kết ngân hàng chỉ dành cho gói Pro và Enterprise.\n\nNâng cấp để nhận cảnh báo giao dịch đáng ngờ theo thời gian thực từ tài khoản ngân hàng của bạn.', () => { closeModal(); goPage('upgrade', document.getElementById('navUpgrade')); });
+    return;
+  }
+
+  document.getElementById('bankModalTitle').textContent = '🏦 Liên kết ngân hàng mới';
+  document.getElementById('bankModalBody').innerHTML = `
+    <div style="margin-bottom:16px">
+      <label style="font-size:12.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Chọn ngân hàng</label>
+      <select id="bankSelect" style="width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);outline:none" onchange="updateBankFields()">
+        ${Object.entries(BANK_INFO).map(([id,b]) => `<option value="${id}" ${id===preselect?'selected':''}>${b.name}</option>`).join('')}
+      </select>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Số tài khoản</label>
+      <input id="bankAccInput" type="text" placeholder="Nhập số tài khoản" style="width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);outline:none;font-family:var(--mono)" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Tên chủ tài khoản</label>
+      <input id="bankOwnerInput" type="text" placeholder="VD: NGUYEN VAN A" style="width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);outline:none;text-transform:uppercase" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:12.5px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">Biệt danh tài khoản (tuỳ chọn)</label>
+      <input id="bankNickInput" type="text" placeholder="VD: Tài khoản chính, Lương..." style="width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);outline:none" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div style="background:var(--warn-bg);border-radius:var(--r-sm);padding:12px;font-size:12px;color:var(--warn);margin-bottom:16px;line-height:1.6">
+      🔒 <strong>Bảo mật:</strong> ScamShield chỉ đọc thông tin giao dịch để phát hiện lừa đảo, không lưu trữ mật khẩu ngân hàng của bạn.
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="linkBank()" style="flex:1;padding:11px;font-size:13.5px;font-weight:700;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">Liên kết ngay</button>
+      <button onclick="closeBankModal()" style="padding:11px 16px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;cursor:pointer">Hủy</button>
+    </div>`;
+
+  document.getElementById('bankModalOverlay').style.display = 'flex';
+}
+
+function linkBank() {
+  const bankId = document.getElementById('bankSelect').value;
+  const acc = document.getElementById('bankAccInput').value.trim();
+  const owner = document.getElementById('bankOwnerInput').value.trim().toUpperCase();
+  const nick = document.getElementById('bankNickInput').value.trim();
+
+  if (!acc || !owner) { toast('⚠️ Vui lòng nhập đầy đủ thông tin'); return; }
+
+  const bank = BANK_INFO[bankId];
+  const newBank = { id: Date.now(), bankId, bankName: bank.name, acc, owner, nick: nick || bank.name, color: bank.color, linked: new Date().toLocaleDateString('vi-VN'), active: true };
+  linkedBanks.push(newBank);
+  saveBanks();
+  renderLinkedBanks();
+  closeBankModal();
+  toast(`✅ Đã liên kết ${bank.name} — ${acc.slice(0,4)}***${acc.slice(-4)}`);
+}
+
+function renderLinkedBanks() {
+  const el = document.getElementById('linkedBanksList');
+  const countEl = document.getElementById('linkedBankCount');
+  if (!el) return;
+  if (countEl) countEl.textContent = linkedBanks.length + ' tài khoản';
+  if (linkedBanks.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:32px 0;color:var(--text-3)"><svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:currentColor;fill:none;stroke-width:1.5;margin-bottom:10px"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><p style="font-size:13px;margin-bottom:12px">Chưa có ngân hàng nào được liên kết</p><button onclick="showAddBankModal()" style="padding:8px 20px;font-size:13px;font-weight:600;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">Liên kết ngân hàng đầu tiên</button></div>`;
+    return;
+  }
+  el.innerHTML = linkedBanks.map(b => `
+    <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="width:42px;height:42px;border-radius:10px;background:${b.color}15;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span style="font-size:11px;font-weight:800;color:${b.color}">${b.bankName.slice(0,4).toUpperCase()}</span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13.5px;font-weight:600">${b.nick}</div>
+        <div style="font-size:12px;color:var(--text-3);font-family:var(--mono)">${b.acc.slice(0,4)}${'*'.repeat(Math.max(0,b.acc.length-8))}${b.acc.slice(-4)} · ${b.bankName}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px">Liên kết: ${b.linked}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="background:var(--safe-bg);color:var(--safe);font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px">● Hoạt động</span>
+        <button onclick="unlinkBank(${b.id})" style="padding:5px 10px;font-size:11.5px;border:1px solid var(--danger);color:var(--danger);background:transparent;border-radius:var(--r-sm);cursor:pointer">Hủy liên kết</button>
+      </div>
+    </div>`).join('');
+}
+
+function unlinkBank(id) {
+  linkedBanks = linkedBanks.filter(b => b.id !== id);
+  saveBanks();
+  renderLinkedBanks();
+  toast('🔌 Đã hủy liên kết ngân hàng');
+}
+function saveBanks() { try { localStorage.setItem('ss_banks', JSON.stringify(linkedBanks)); } catch(e) {} }
+function loadBanks() { try { const s = localStorage.getItem('ss_banks'); if(s) { linkedBanks = JSON.parse(s); renderLinkedBanks(); } } catch(e) {} }
+function closeBankModal(e) {
+  if (!e || e.target === document.getElementById('bankModalOverlay'))
+    document.getElementById('bankModalOverlay').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DAA CRYPTO MARKET — DAATHENA.COM API INTEGRATION
+// Base URL: https://api.daathena.com/api/v2
+// Auth: Header "Authorization: YOUR_API_KEY"
+// Docs: https://docs.daathena.com/api-docs
+// ═══════════════════════════════════════════════════════════════════════
+
+// ─── CẤU HÌNH DAA API ───────────────────────────────────────────────
+// Cách dùng: nhập API key vào ô trong trang DAA Market
+// Lấy key tại: https://daathena.com/vi/settings/api-keys
+const DAA_DIRECT_URL = 'https://api.daathena.com/api/v2';
+// ─── BACKEND URL ─────────────────────────────────────────────────────
+// Khi chạy backend api.py (port 8080), đổi thành 'http://localhost:8080'
+// Backend tự proxy DAA API — không cần DAA_PROXY_URL riêng nữa
+const BACKEND_URL = localStorage.getItem('ss_backend_url') || 'http://localhost:8080';
+
+// Proxy URL — để trống '' nếu dùng BACKEND_URL ở trên
+// Chỉ cần khi không chạy backend Python
+const DAA_PROXY_URL = localStorage.getItem('ss_daa_proxy') || (BACKEND_URL ? BACKEND_URL + '/daa/proxy' : '');
+let daaAllCurrencies = [];
+
+// ─── Lấy DAA API key ─────────────────────────────────────────────────
+function getDaaKey() {
+  const inp = document.getElementById('daaApiKeyInput');
+  const saved = localStorage.getItem('ss_daa_key') || '';
+  return (inp?.value?.trim()) || saved;
+}
+
+function onDaaKeyChange(input) {
+  const key = input.value.trim();
+  if (key.length > 8) {
+    try { localStorage.setItem('ss_daa_key', key); } catch(e) {}
+    setDaaStatus('Key đã lưu — nhấn Test kết nối', '#F59E0B', '#F59E0B');
+  }
+}
+
+function setDaaStatus(text, dotColor, textColor) {
+  const dot = document.getElementById('daaStatusDot');
+  const txt = document.getElementById('daaStatusText');
+  if (dot) dot.style.background = dotColor;
+  if (txt) { txt.textContent = text; txt.style.color = textColor || 'var(--text-2)'; }
+}
+
+// ─── Wrapper gọi DAA API ─────────────────────────────────────────────
+// Tự động chọn: proxy (nếu DAA_PROXY_URL có giá trị) hoặc gọi thẳng
+async function daaFetch(endpoint, params = {}) {
+  const key = getDaaKey();
+  const proxyUrl = localStorage.getItem('ss_daa_proxy') || '';
+
+  if (proxyUrl) {
+    // ── Mode 1: Qua proxy server ──────────────────────────────────────
+    let resp;
+    try {
+      resp = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: endpoint, params, apiKey: key }),
+      });
+    } catch(netErr) {
+      // Proxy server chưa chạy hoặc sai URL
+      throw new DaaProxyError(
+        'Không kết nối được tới proxy server tại: ' + proxyUrl,
+        'proxy_offline'
+      );
+    }
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.message || 'Proxy lỗi HTTP ' + resp.status);
+    }
+    const data = await resp.json();
+    if (data.error === true) throw new Error(data.message || 'DAA API error');
+    return data;
+
+  } else {
+    // ── Mode 2: Gọi thẳng DAA API ────────────────────────────────────
+    const url = new URL(DAA_DIRECT_URL + endpoint);
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    let resp;
+    try {
+      resp = await fetch(url.toString(), {
+        headers: key ? { 'Authorization': key } : {},
+      });
+    } catch(netErr) {
+      throw new Error('Không thể kết nối DAA API — kiểm tra mạng internet');
+    }
+    if (resp.status === 403) throw new DaaWhitelistError();
+    if (resp.status === 401) throw new Error('API Key không hợp lệ hoặc hết hạn');
+    if (resp.status === 404) throw new Error('Endpoint không tồn tại');
+    if (!resp.ok) throw new Error('DAA API lỗi HTTP ' + resp.status);
+    const data = await resp.json();
+    if (data.error === true) throw new Error(data.message || 'DAA API error');
+    return data;
+  }
+}
+
+// Custom error classes để hiện đúng hướng dẫn
+class DaaWhitelistError extends Error {
+  constructor() {
+    super('403 — Host not in allowlist');
+    this.type = 'whitelist';
+  }
+}
+class DaaProxyError extends Error {
+  constructor(msg, type) {
+    super(msg);
+    this.type = type;
+  }
+}
+
+// ─── Test kết nối ────────────────────────────────────────────────────
+async function testDaaConnection() {
+  setDaaStatus('Đang kiểm tra...', '#F59E0B', '#F59E0B');
+  hideDaaError();
+  try {
+    const data = await daaFetch('/public/trade-spot/ticker/24h', { symbol: 'btcusdt' });
+    const price = data?.data?.lastPrice;
+    const proxyUrl = localStorage.getItem('ss_daa_proxy') || '';
+    const mode = proxyUrl ? '(qua proxy)' : '(trực tiếp)';
+    setDaaStatus(`✅ Kết nối OK ${mode} — BTC = $${price?.toLocaleString('en-US') || '?'}`, '#0BAF6A', '#0BAF6A');
+    toast('✅ DAA API kết nối thành công!');
+    updateBtcTicker(data.data);
+  } catch (e) {
+    setDaaStatus('❌ ' + e.message, '#E53935', '#E53935');
+    showDaaError(e);  // pass full error object để detect type
+    toast('❌ ' + e.message);
+  }
+}
+
+function showDaaError(err) {
+  const banner  = document.getElementById('daaErrorBanner');
+  const msgEl   = document.getElementById('daaErrorMsg');
+  const fixWL   = document.getElementById('daaFixWhitelist');
+  const fixStps = document.getElementById('daaFixSteps');
+  const fixPxy  = document.getElementById('daaFixProxy');
+  if (!banner) return;
+  banner.style.display = 'block';
+
+  const msg = typeof err === 'string' ? err : (err.message || 'Lỗi không xác định');
+  if (msgEl) msgEl.textContent = msg;
+
+  // Reset tất cả fix sections
+  [fixWL, fixStps, fixPxy].forEach(el => { if (el) el.style.display = 'none'; });
+
+  const errType = err?.type || '';
+  if (errType === 'whitelist' || msg.includes('403') || msg.includes('allowlist')) {
+    // Lỗi whitelist → hiện 2 cách fix
+    if (fixWL) fixWL.style.display = 'block';
+    if (fixStps) fixStps.style.display = 'block';
+    // Lấy IP public để user biết cần whitelist IP nào
+    fetchMyIp();
+  } else if (errType === 'proxy_offline' || msg.includes('ERR_CONNECTION_REFUSED') || msg.includes('Failed to fetch')) {
+    // Proxy chưa chạy
+    if (fixPxy) fixPxy.style.display = 'block';
+  }
+}
+
+function hideDaaError() {
+  const banner = document.getElementById('daaErrorBanner');
+  if (banner) banner.style.display = 'none';
+}
+
+function onDaaProxyChange(input) {
+  const url = input.value.trim();
+  try { localStorage.setItem('ss_daa_proxy', url); } catch(e) {}
+  if (url) {
+    input.style.borderColor = 'var(--brand)';
+    toast('💾 Đã lưu Proxy URL: ' + url);
+  } else {
+    input.style.borderColor = 'var(--border)';
+    toast('🗑 Đã xóa Proxy URL — sẽ gọi DAA API trực tiếp');
+  }
+}
+
+function clearDaaConfig() {
+  try {
+    localStorage.removeItem('ss_daa_key');
+    localStorage.removeItem('ss_daa_proxy');
+  } catch(e) {}
+  const keyInp   = document.getElementById('daaApiKeyInput');
+  const proxyInp = document.getElementById('daaProxyInput');
+  if (keyInp) keyInp.value = '';
+  if (proxyInp) proxyInp.value = '';
+  hideDaaError();
+  setDaaStatus('Chưa kết nối', 'var(--text-3)', 'var(--text-3)');
+  toast('🗑 Đã xóa cấu hình DAA');
+}
+
+async function fetchMyIp() {
+  const el = document.getElementById('myPublicIp');
+  if (!el) return;
+  try {
+    const r = await fetch('https://api.ipify.org?format=json');
+    const d = await r.json();
+    el.textContent = d.ip + ' (cần thêm vào whitelist)';
+  } catch(e) {
+    el.textContent = 'Không lấy được — truy cập https://whatismyip.com';
+  }
+}
+
+// ─── BTC Ticker ──────────────────────────────────────────────────────
+async function refreshBtcTicker() {
+  try {
+    const data = await daaFetch('/public/trade-spot/ticker/24h', { symbol: 'btcusdt' });
+    updateBtcTicker(data.data);
+  } catch(e) {
+    toast('⚠️ Không tải được ticker: ' + e.message);
+  }
+}
+
+function updateBtcTicker(d) {
+  if (!d) return;
+  const priceEl = document.getElementById('daaBtcPrice');
+  const changeEl = document.getElementById('daaBtcChange');
+  const highEl   = document.getElementById('daaBtcHigh');
+  const lowEl    = document.getElementById('daaBtcLow');
+  const volEl    = document.getElementById('daaBtcVol');
+  const timeEl   = document.getElementById('daaBtcTime');
+
+  if (priceEl) priceEl.textContent = '$' + (d.lastPrice || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (changeEl) {
+    const pct = (d.priceChangePercent || 0).toFixed(4);
+    const isUp = parseFloat(pct) >= 0;
+    changeEl.textContent = (isUp ? '▲ +' : '▼ ') + pct + '%';
+    changeEl.style.color = isUp ? 'var(--safe)' : 'var(--danger)';
+  }
+  if (highEl) highEl.textContent = '$' + (d.highPrice || 0).toLocaleString();
+  if (lowEl)  lowEl.textContent  = '$' + (d.lowPrice  || 0).toLocaleString();
+  if (volEl)  volEl.textContent  = (d.volume || 0).toFixed(4);
+  if (timeEl) timeEl.textContent = 'Cập nhật: ' + new Date().toLocaleTimeString('vi-VN');
+}
+
+// ─── Load Market (currencies list) ───────────────────────────────────
+async function loadDaaMarket() {
+  const listEl = document.getElementById('daaMarketList');
+  const countEl = document.getElementById('daaCurrencyCount');
+  if (listEl) listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-3);font-size:13px">⏳ Đang tải danh sách từ DAA API...</div>';
+
+  try {
+    const data = await daaFetch('/public/wallet/currencies', { page: '1', per_page: '100' });
+    const currencies = data?.data?.data || [];
+    daaAllCurrencies = currencies;
+    if (countEl) countEl.textContent = `${currencies.length} currencies từ DAA`;
+    renderDaaCurrencies(currencies);
+
+    // Also load BTC ticker
+    refreshBtcTicker();
+    // Load orderbook
+    loadOrderbook('btcusdt');
+
+    setDaaStatus('✅ Đã tải xong', '#0BAF6A', '#0BAF6A');
+    toast(`✅ Đã tải ${currencies.length} currencies từ DAA`);
+  } catch(e) {
+    if (listEl) listEl.innerHTML = `<div style="padding:24px;text-align:center;color:var(--danger);font-size:13px">❌ Lỗi: ${e.message}<br><br><small>Kiểm tra API key và kết nối mạng</small></div>`;
+    setDaaStatus('❌ Lỗi kết nối', '#E53935', '#E53935');
+    toast('❌ ' + e.message);
+  }
+}
+
+function renderDaaCurrencies(currencies) {
+  const el = document.getElementById('daaMarketList');
+  if (!el) return;
+  if (!currencies.length) {
+    el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-3)">Không có dữ liệu</div>';
+    return;
+  }
+  el.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+      <thead>
+        <tr style="background:var(--surface2);position:sticky;top:0;z-index:1">
+          <th style="padding:10px 16px;text-align:left;font-weight:600;border-bottom:1px solid var(--border)">#</th>
+          <th style="padding:10px 16px;text-align:left;font-weight:600;border-bottom:1px solid var(--border)">Symbol</th>
+          <th style="padding:10px 16px;text-align:left;font-weight:600;border-bottom:1px solid var(--border)">Tên</th>
+          <th style="padding:10px 16px;text-align:left;font-weight:600;border-bottom:1px solid var(--border)">Loại</th>
+          <th style="padding:10px 16px;text-align:right;font-weight:600;border-bottom:1px solid var(--border)">Giá (VND)</th>
+          <th style="padding:10px 16px;text-align:center;font-weight:600;border-bottom:1px solid var(--border)">Trạng thái</th>
+          <th style="padding:10px 16px;text-align:center;font-weight:600;border-bottom:1px solid var(--border)">Kiểm tra Scam</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${currencies.map((c, i) => `
+          <tr style="background:${i%2?'var(--surface2)':'var(--surface)'};cursor:pointer" onclick="checkTokenScamDirect('${c.symbol}','${c.title}',${c.market_base_price||0})">
+            <td style="padding:9px 16px;color:var(--text-3);font-family:var(--mono)">${c.ranking||i+1}</td>
+            <td style="padding:9px 16px"><span style="font-weight:700;font-family:var(--mono);color:var(--brand)">${c.symbol}</span></td>
+            <td style="padding:9px 16px;color:var(--text-2)">${c.title||'—'}</td>
+            <td style="padding:9px 16px"><span style="font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;background:${c.type==='FIAT'?'var(--warn-bg)':'var(--brand-light)'};color:${c.type==='FIAT'?'var(--warn)':'var(--brand)'}">${c.type||'CRYPTO'}</span></td>
+            <td style="padding:9px 16px;text-align:right;font-family:var(--mono);font-size:12px">${c.market_base_price>0?'₫'+c.market_base_price.toLocaleString('vi-VN',{maximumFractionDigits:0}):'—'}</td>
+            <td style="padding:9px 16px;text-align:center">
+              <span style="font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;background:${c.status?'var(--safe-bg)':'var(--danger-bg)'};color:${c.status?'var(--safe)':'var(--danger)'}">
+                ${c.status?'● Hoạt động':'● Dừng'}
+              </span>
+            </td>
+            <td style="padding:9px 16px;text-align:center">
+              <button onclick="event.stopPropagation();checkTokenScamDirect('${c.symbol}','${c.title}',${c.market_base_price||0})" style="padding:3px 9px;font-size:11px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;cursor:pointer;color:var(--text-2)">Kiểm tra</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function filterDaaList(query) {
+  if (!daaAllCurrencies.length) return;
+  const q = query.toLowerCase();
+  const filtered = q ? daaAllCurrencies.filter(c =>
+    c.symbol?.toLowerCase().includes(q) || c.title?.toLowerCase().includes(q)
+  ) : daaAllCurrencies;
+  renderDaaCurrencies(filtered);
+}
+
+// ─── Kiểm tra scam token ─────────────────────────────────────────────
+async function checkTokenScam() {
+  const sym = (document.getElementById('daaScamSymbol')?.value || '').trim().toUpperCase();
+  if (!sym) { toast('⚠️ Nhập mã token'); return; }
+
+  const resEl = document.getElementById('daaScamResult');
+  if (resEl) resEl.innerHTML = '<span style="color:var(--text-3)">⏳ Đang kiểm tra...</span>';
+
+  try {
+    const data = await daaFetch('/public/wallet/currency/detail', { symbol: sym });
+    const c = data?.data;
+    if (!c) throw new Error('Token không tìm thấy trên DAA');
+    checkTokenScamDirect(c.symbol, c.title, c.market_base_price || 0, true);
+  } catch(e) {
+    if (resEl) resEl.innerHTML = `<div style="color:var(--danger);font-size:13px">❌ ${e.message}<br><small style="color:var(--text-3)">Token này không tồn tại trên DAA → có thể là token giả mạo!</small></div>`;
+  }
+}
+
+function checkTokenScamDirect(symbol, title, price, updateInput) {
+  const resEl = document.getElementById('daaScamResult');
+  if (!resEl) return;
+  if (updateInput) {
+    const inp = document.getElementById('daaScamSymbol');
+    if (inp) inp.value = symbol;
+  }
+
+  // Phân tích scam dựa trên dữ liệu thật
+  const issues = [];
+  const safe = [];
+
+  if (price === 0) issues.push('⚠️ Giá bằng 0 — token này có thể không có giá trị thật');
+  else safe.push(`✅ Giá trên DAA: ₫${price.toLocaleString('vi-VN',{maximumFractionDigits:0})}`);
+
+  // Kiểm tra tên giả mạo các token nổi tiếng
+  const famousTokens = ['BITCOIN','ETHEREUM','TETHER','BNB','SOLANA','USDC','DOGE','XRP'];
+  const titleUpper = (title || '').toUpperCase();
+  if (famousTokens.some(f => titleUpper.includes(f)) && !['BTC','ETH','USDT','BNB','SOL','USDC','DOGE','XRP'].includes(symbol)) {
+    issues.push(`🚨 Tên "${title}" giả mạo token nổi tiếng nhưng symbol là "${symbol}"`);
+  }
+
+  if (symbol.length > 10) issues.push('⚠️ Symbol quá dài — token thật thường có 2-6 ký tự');
+  else safe.push(`✅ Symbol hợp lệ: ${symbol}`);
+
+  safe.push(`✅ Token được xác nhận tồn tại trên sàn DAA`);
+
+  const isScam = issues.length >= 2;
+  const isWarn = issues.length === 1;
+
+  resEl.innerHTML = `
+    <div style="width:100%">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:18px">${isScam?'🚨':isWarn?'⚠️':'✅'}</span>
+        <span style="font-weight:700;color:${isScam?'var(--danger)':isWarn?'var(--warn)':'var(--safe)'}">${symbol} (${title}) — ${isScam?'NGHI NGỜ SCAM':isWarn?'CẦN CHÚ Ý':'AN TOÀN'}</span>
+      </div>
+      ${[...issues,...safe].map(i=>`<div style="font-size:12px;color:var(--text-2);margin-bottom:3px">${i}</div>`).join('')}
+    </div>`;
+
+  // Add to history
+  pushHistory(`${symbol} (DAA check)`, isScam?'danger':isWarn?'warn':'safe', `DAA: ${title} | Giá: ₫${price.toLocaleString('vi-VN',{maximumFractionDigits:0})}`);
+  updateKPIs(isScam?'danger':isWarn?'warn':'safe');
+}
+
+// ─── Orderbook ───────────────────────────────────────────────────────
+async function loadOrderbook(symbol) {
+  try {
+    const data = await daaFetch('/public/trade-spot/oderbook', { symbol, limit: '5' });
+    const bids = data?.data?.bids || [];
+    const asks = data?.data?.asks || [];
+
+    const bidsEl = document.getElementById('daaBids');
+    const asksEl = document.getElementById('daaAsks');
+
+    if (bidsEl) bidsEl.innerHTML = bids.slice(0,5).map(b =>
+      `<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:var(--safe)">${parseFloat(b[0]).toLocaleString()}</span><span style="color:var(--text-3)">${parseFloat(b[1]).toFixed(5)}</span></div>`
+    ).join('') || '—';
+
+    if (asksEl) asksEl.innerHTML = asks.slice(0,5).map(a =>
+      `<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:var(--danger)">${parseFloat(a[0]).toLocaleString()}</span><span style="color:var(--text-3)">${parseFloat(a[1]).toFixed(5)}</span></div>`
+    ).join('') || '—';
+  } catch(e) {
+    const bidsEl = document.getElementById('daaBids');
+    if (bidsEl) bidsEl.textContent = 'Cần API key';
+  }
+}
+
+// ─── Restore DAA key on load ─────────────────────────────────────────
+function restoreDaaKey() {
+  try {
+    const savedKey   = localStorage.getItem('ss_daa_key')   || '';
+    const savedProxy = localStorage.getItem('ss_daa_proxy') || '';
+
+    const keyInp   = document.getElementById('daaApiKeyInput');
+    const proxyInp = document.getElementById('daaProxyInput');
+
+    if (savedKey && keyInp) {
+      keyInp.value = savedKey;
+      setDaaStatus('Key đã lưu — nhấn Test kết nối', '#F59E0B', '#F59E0B');
+    }
+    if (savedProxy && proxyInp) {
+      proxyInp.value = savedProxy;
+    }
+  } catch(e) {}
+}
+
+function onBackendUrlChange(input) {
+  const url = input.value.trim();
+  const statusEl = document.getElementById('backendStatus');
+  if (url) {
+    try { localStorage.setItem('ss_backend_url', url); } catch(e) {}
+    // Test nhanh
+    if (statusEl) statusEl.textContent = '⏳';
+    fetch(url + '/', { signal: AbortSignal.timeout(3000) })
+      .then(r => r.json())
+      .then(d => {
+        if (statusEl) statusEl.textContent = d.status ? '✅' : '🟡';
+        toast('✅ Backend ' + (d.status || 'connected') + ' — port ' + (url.split(':').pop() || '8080'));
+      })
+      .catch(() => {
+        if (statusEl) statusEl.textContent = '❌';
+        toast('⚠️ Chưa kết nối được backend — kiểm tra uvicorn đang chạy chưa');
+      });
+  } else {
+    try { localStorage.removeItem('ss_backend_url'); } catch(e) {}
+    if (statusEl) statusEl.textContent = '⬜';
+    toast('ℹ️ Backend URL đã xóa — dùng Claude API hoặc offline');
+  }
+}
+
+function restoreBackendUrl() {
+  try {
+    const saved = localStorage.getItem('ss_backend_url');
+    if (saved) {
+      const inp = document.getElementById('backendUrlInput');
+      if (inp) inp.value = saved;
+      // Kiểm tra kết nối
+      const statusEl = document.getElementById('backendStatus');
+      fetch(saved + '/', { signal: AbortSignal.timeout(2000) })
+        .then(r => r.json())
+        .then(() => { if (statusEl) statusEl.textContent = '✅'; })
+        .catch(() => { if (statusEl) statusEl.textContent = '❌'; });
+    }
+  } catch(e) {}
+}
+
+function onApiKeyChange(input) {
+  const key = input.value.trim();
+  const statusEl = document.getElementById('apiKeyStatus');
+  const hintEl = document.getElementById('apiKeyHint');
+  if (key.startsWith('sk-ant-') && key.length > 20) {
+    if (statusEl) statusEl.textContent = '✅';
+    if (hintEl) { hintEl.textContent = 'API key hợp lệ — AI thật đang hoạt động'; hintEl.style.color = 'var(--safe)'; }
+    try { localStorage.setItem('ss_claude_key', key); } catch(e) {}
+  } else if (key.length > 0) {
+    if (statusEl) statusEl.textContent = '❌';
+    if (hintEl) { hintEl.textContent = 'Key không hợp lệ (phải bắt đầu bằng sk-ant-)'; hintEl.style.color = 'var(--danger)'; }
+  } else {
+    if (statusEl) statusEl.textContent = '🔑';
+    if (hintEl) { hintEl.textContent = 'Nhập key để dùng AI thật. Không có key → dùng phân tích offline.'; hintEl.style.color = 'var(--text-3)'; }
+    try { localStorage.removeItem('ss_claude_key'); } catch(e) {}
+  }
+}
+
+// MVP: history persistence handled directly in pushHistory above
 
 async function analyzeScamOffline(content, context) {
   // Simulate slight processing delay for UX
@@ -1402,6 +2888,9 @@ function pushHistory(msg, type, detail) {
 
   // Notification
   if(type === 'danger') addNotif('🚨', `Phát hiện scam: ${msg.slice(0,30)}...`);
+
+  // MVP: persist to localStorage
+  saveHistoryToStorage();
 }
 
 function showHistDetail(msg, type, detail) {
@@ -1735,6 +3224,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let cur = 0; const step = Math.ceil(target/40);
     const iv = setInterval(() => { cur = Math.min(cur+step, target); dom.textContent = cur.toLocaleString(); if(cur>=target) clearInterval(iv); }, 30);
   });
+
+  // MVP: Restore saved API key
+  try {
+    const savedKey = localStorage.getItem('ss_claude_key');
+    if (savedKey) {
+      const inp = document.getElementById('claudeApiKey');
+      if (inp) { inp.value = savedKey; onApiKeyChange(inp); }
+    }
+  } catch(e) {}
+
+  // MVP: Load history from storage
+  loadHistoryFromStorage();
+
+  // MVP: Init plan & usage UI
+  updatePlanUI();
+  updatePlanCards();
+
+  // MVP: Load linked banks
+  loadBanks();
+
+  // DAA: Restore API key
+  restoreDaaKey();
+
+  // Backend: Restore URL
+  restoreBackendUrl();
 });
 </script>
 </body>
