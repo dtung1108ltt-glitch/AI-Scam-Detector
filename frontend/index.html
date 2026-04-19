@@ -398,14 +398,6 @@ textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 
       Nâng cấp gói
       <span class="nav-badge" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">HOT</span>
     </button>
-    <button class="nav-item" onclick="goPage('banking',this)">
-      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-      Liên kết ngân hàng
-    </button>
-    <button class="nav-item" onclick="goPage('api',this)">
-      <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      API & Tích hợp
-    </button>
     <button class="nav-item" onclick="goPage('settings',this)">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Cài đặt
@@ -418,17 +410,7 @@ textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 
       <span id="sbPlanLabel" style="font-size:11px;font-weight:700;background:var(--brand-light);color:var(--brand);padding:3px 9px;border-radius:20px;cursor:pointer" onclick="goPage('upgrade',document.getElementById('navUpgrade'))">🆓 Free</span>
       <span id="usageCounter" style="font-size:10px;color:var(--text-3);font-family:var(--mono)">0/50 lượt hôm nay</span>
     </div>
-    <!-- Backend URL -->
-    <div style="padding:0 10px 6px">
-      <div style="font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">🖥 Backend (port 8080)</div>
-      <div style="position:relative">
-        <input id="backendUrlInput" type="text" placeholder="http://localhost:8080"
-          style="width:100%;padding:6px 30px 6px 8px;font-size:11px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);font-family:var(--mono);outline:none;transition:border-color .15s"
-          oninput="onBackendUrlChange(this)"
-          onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='var(--border)'"/>
-        <div id="backendStatus" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:11px">⬜</div>
-      </div>
-    </div>
+
     <!-- Claude API Key -->
     <div style="padding:0 10px 8px">
       <div style="position:relative">
@@ -819,59 +801,6 @@ textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 
       </div>
     </div>
 
-    <!-- ═══════════ PAGE: API ═══════════ -->
-    <div class="page" id="page-api">
-      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">API & Tích hợp</h2>
-      <p style="font-size:13px;color:var(--text-3);margin-bottom:20px">Tích hợp ScamShield vào hệ thống của bạn qua REST API</p>
-      <div class="card">
-        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg></div><div><div class="card-ttl">API Key của bạn</div><div class="card-sub">Dùng key này để xác thực request</div></div></div><button class="btn-txt" onclick="regenKey()">Tạo key mới</button></div>
-        <div class="card-bd">
-          <div class="api-key-box">
-            <div class="api-key-val" id="apiKeyVal">ss_live_••••••••••••••••••••••••••••••••</div>
-            <button class="api-copy-btn" onclick="toggleKey(this)">Hiện</button>
-            <button class="api-copy-btn" onclick="copyKey()">Sao chép</button>
-          </div>
-          <p style="font-size:12px;color:var(--text-3);margin-top:8px">⚠️ Không chia sẻ API key với bất kỳ ai. Giữ key này bảo mật.</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><div><div class="card-ttl">Endpoints</div><div class="card-sub">Base URL: https://api.scamshield.vn/v1</div></div></div></div>
-        <div class="card-bd">
-          <div class="endpoint-list">
-            <div class="endpoint-row"><span class="method-tag post">POST</span><code class="endpoint-path">/check</code><span class="endpoint-desc">Phân tích nội dung scam</span></div>
-            <div class="endpoint-row"><span class="method-tag get">GET</span><code class="endpoint-path">/history</code><span class="endpoint-desc">Lấy lịch sử quét</span></div>
-            <div class="endpoint-row"><span class="method-tag get">GET</span><code class="endpoint-path">/stats</code><span class="endpoint-desc">Thống kê tổng hợp</span></div>
-            <div class="endpoint-row"><span class="method-tag post">POST</span><code class="endpoint-path">/report</code><span class="endpoint-desc">Báo cáo scam mới</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><div><div class="card-ttl">Ví dụ sử dụng</div></div></div></div>
-        <div class="card-bd">
-          <div class="code-block">
-            <button class="code-copy" onclick="copyCode()">Sao chép</button>
-<span class="code-cm">// Gọi API ScamShield</span>
-<span class="code-kw">const</span> response = <span class="code-kw">await</span> fetch(<span class="code-str">'https://api.scamshield.vn/v1/check'</span>, {
-  method: <span class="code-str">'POST'</span>,
-  headers: {
-    <span class="code-str">'Authorization'</span>: <span class="code-str">'Bearer YOUR_API_KEY'</span>,
-    <span class="code-str">'Content-Type'</span>: <span class="code-str">'application/json'</span>
-  },
-  body: JSON.stringify({
-    message: <span class="code-str">'https://bnb-airdrop-claim.xyz'</span>,
-    platform: <span class="code-str">'crypto'</span>
-  })
-});
-
-<span class="code-kw">const</span> data = <span class="code-kw">await</span> response.json();
-<span class="code-cm">// { result: "SCAM", confidence: 0.97, reason: "..." }</span>
-console.log(data.result); <span class="code-cm">// "SCAM"</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- ═══════════ PAGE: SETTINGS ═══════════ -->
     <!-- MVP: BATCH SCAN PAGE -->
@@ -995,7 +924,6 @@ console.log(data.result); <span class="code-cm">// "SCAM"</span>
             <li>✅ Lịch sử 30 ngày</li>
             <li>✅ Dashboard cơ bản</li>
             <li style="color:var(--text-3)">❌ Quét hàng loạt</li>
-            <li style="color:var(--text-3)">❌ Liên kết ngân hàng</li>
             <li style="color:var(--text-3)">❌ API access</li>
             <li style="color:var(--text-3)">❌ Báo cáo PDF</li>
           </ul>
@@ -1015,7 +943,6 @@ console.log(data.result); <span class="code-cm">// "SCAM"</span>
             <li>✅ Lịch sử <strong>vĩnh viễn</strong></li>
             <li>✅ Dashboard nâng cao + báo cáo</li>
             <li>✅ <strong>Quét hàng loạt</strong> 100 mục</li>
-            <li>✅ <strong>Liên kết ngân hàng</strong></li>
             <li>✅ API access (10k req/tháng)</li>
             <li>✅ Xuất báo cáo PDF</li>
           </ul>
@@ -1041,116 +968,7 @@ console.log(data.result); <span class="code-cm">// "SCAM"</span>
           <button id="btnPlanEnterprise" onclick="selectPlan('enterprise')" style="width:100%;margin-top:20px;padding:10px;font-size:13.5px;font-weight:600;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text-1);cursor:pointer">Liên hệ tư vấn →</button>
         </div>
       </div>
-
-      <!-- So sánh chi tiết -->
-      <div class="card">
-        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div><div><div class="card-ttl">So sánh chi tiết</div></div></div></div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:13px">
-            <thead>
-              <tr style="background:var(--surface2)">
-                <th style="padding:12px 16px;text-align:left;font-weight:600;border-bottom:1px solid var(--border)">Tính năng</th>
-                <th style="padding:12px 16px;text-align:center;font-weight:600;border-bottom:1px solid var(--border);color:var(--text-3)">Free</th>
-                <th style="padding:12px 16px;text-align:center;font-weight:600;border-bottom:1px solid var(--border);color:var(--brand)">Pro</th>
-                <th style="padding:12px 16px;text-align:center;font-weight:600;border-bottom:1px solid var(--border)">Enterprise</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${[
-                ['Lượt AI / ngày','50','1.000','Không giới hạn'],
-                ['Phân tích nội dung','✅','✅','✅'],
-                ['Lịch sử quét','30 ngày','Vĩnh viễn','Vĩnh viễn'],
-                ['Quét hàng loạt','❌','100 mục','1.000 mục'],
-                ['Liên kết ngân hàng','❌','✅','✅'],
-                ['API access','❌','10k req/tháng','Không giới hạn'],
-                ['Xuất báo cáo PDF','❌','✅','✅'],
-                ['Hỗ trợ','Community','Email priority','24/7 dedicated'],
-                ['SLA uptime','—','99.5%','99.9%'],
-              ].map(([f,a,b,c],i) => `<tr style="background:${i%2?'var(--surface2)':'var(--surface)'}">
-                <td style="padding:10px 16px;border-bottom:1px solid var(--border);font-weight:500">${f}</td>
-                <td style="padding:10px 16px;border-bottom:1px solid var(--border);text-align:center;color:var(--text-3)">${a}</td>
-                <td style="padding:10px 16px;border-bottom:1px solid var(--border);text-align:center;color:var(--brand);font-weight:600">${b}</td>
-                <td style="padding:10px 16px;border-bottom:1px solid var(--border);text-align:center">${c}</td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         TRANG LIÊN KẾT NGÂN HÀNG
-    ════════════════════════════════════════════════════════════════ -->
-    <div class="page" id="page-banking">
-      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Liên kết ngân hàng</h2>
-      <p style="font-size:13px;color:var(--text-3);margin-bottom:24px">Kết nối tài khoản ngân hàng để nhận cảnh báo giao dịch đáng ngờ theo thời gian thực</p>
-
-      <!-- Linked banks list -->
-      <div class="card" style="margin-bottom:18px">
-        <div class="card-hd">
-          <div class="card-hd-l">
-            <div class="card-hd-ico"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-            <div><div class="card-ttl">Ngân hàng đã liên kết</div><div class="card-sub" id="linkedBankCount">0 tài khoản</div></div>
-          </div>
-          <button class="btn-txt" onclick="showAddBankModal()">+ Thêm ngân hàng</button>
-        </div>
-        <div id="linkedBanksList" style="padding:16px">
-          <div style="text-align:center;padding:32px 0;color:var(--text-3)">
-            <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:currentColor;fill:none;stroke-width:1.5;margin-bottom:10px"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            <p style="font-size:13px;margin-bottom:12px">Chưa có ngân hàng nào được liên kết</p>
-            <button onclick="showAddBankModal()" style="padding:8px 20px;font-size:13px;font-weight:600;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer">Liên kết ngân hàng đầu tiên</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Supported banks grid -->
-      <div class="card">
-        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="card-ttl">Ngân hàng được hỗ trợ</div><div class="card-sub">6 ngân hàng tại Việt Nam</div></div></div></div>
-        <div style="padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-          ${[
-            {id:'vcb', name:'Vietcombank', short:'VCB', color:'#007B40', desc:'Ngân hàng TMCP Ngoại thương VN', hotline:'1800 545 413'},
-            {id:'bidv', name:'BIDV', short:'BIDV', color:'#1565C0', desc:'Ngân hàng Đầu tư & Phát triển VN', hotline:'1900 9247'},
-            {id:'vtb', name:'VietinBank', short:'CTG', color:'#FF6B00', desc:'Ngân hàng Công thương Việt Nam', hotline:'1800 588 880'},
-            {id:'tcb', name:'Techcombank', short:'TCB', color:'#CC0000', desc:'Ngân hàng TMCP Kỹ Thương VN', hotline:'1800 588 822'},
-            {id:'mb', name:'MBBank', short:'MBB', color:'#003087', desc:'Ngân hàng TMCP Quân đội', hotline:'1900 545 426'},
-            {id:'tpb', name:'TPBank', short:'TPB', color:'#7B1FA2', desc:'Ngân hàng TMCP Tiên Phong', hotline:'1900 585 885'},
-          ].map(b => `
-            <div onclick="showAddBankModal('${b.id}')" style="border:1.5px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:all .2s;background:var(--surface)" onmouseover="this.style.borderColor='${b.color}';this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
-              <div style="width:44px;height:44px;border-radius:10px;background:${b.color}15;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
-                <span style="font-size:13px;font-weight:800;color:${b.color}">${b.short}</span>
-              </div>
-              <div style="font-size:13.5px;font-weight:700;margin-bottom:3px">${b.name}</div>
-              <div style="font-size:11px;color:var(--text-3);line-height:1.4;margin-bottom:8px">${b.desc}</div>
-              <div style="font-size:11px;color:var(--text-2);font-family:var(--mono)">${b.hotline}</div>
-              <div style="margin-top:10px;font-size:11.5px;font-weight:600;color:${b.color}">Kết nối →</div>
-            </div>`).join('')}
-        </div>
-      </div>
-
-      <!-- Alert settings for banks -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-hd"><div class="card-hd-l"><div class="card-hd-ico" style="background:var(--warn-bg);color:var(--warn)"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="card-ttl">Cài đặt cảnh báo giao dịch</div><div class="card-sub">Khi nào AI sẽ cảnh báo bạn</div></div></div></div>
-        <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          ${[
-            ['Giao dịch vượt ngưỡng', '> 5,000,000₫', true],
-            ['Chuyển khoản đêm khuya', '22:00 – 05:00', true],
-            ['Tài khoản nhận lạ', 'Chưa từng giao dịch', true],
-            ['Giao dịch dồn dập', '>5 lần / 10 phút', false],
-            ['Địa chỉ IP nước ngoài', 'Ngoài Việt Nam', true],
-            ['Số tiền tròn đáng ngờ', 'VD: 500k, 1tr, 2tr', false],
-          ].map(([label, desc, checked]) => `
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:var(--r-sm)">
-              <div>
-                <div style="font-size:13px;font-weight:500">${label}</div>
-                <div style="font-size:11.5px;color:var(--text-3);margin-top:2px">${desc}</div>
-              </div>
-              <label class="toggle"><input type="checkbox" ${checked?'checked':''} onchange="saveSetting('bank_${label}',this.checked)"><span class="toggle-slider"></span></label>
-            </div>`).join('')}
-        </div>
-      </div>
-    </div>
-
-
     <!-- ═══════════════════════════════════════════════════════════════
          TRANG DAA CRYPTO MARKET — TÍCH HỢP API DAATHENA.COM
     ════════════════════════════════════════════════════════════════ -->

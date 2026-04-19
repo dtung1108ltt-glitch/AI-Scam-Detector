@@ -59,10 +59,10 @@ function clearAll() {
 
 // ── Result UI ────────────────────────────────────────────────────
 /**
- * Hiển thị kết quả phân tích với màu sắc phù hợp.
- * @param {string} txt                          - Nội dung hiển thị
- * @param {"safe"|"danger"|"warn"|""} type      - Loại kết quả
- * @param {string} st                           - Dòng trạng thái ngắn
+
+ * @param {string} txt                          
+ * @param {"safe"|"danger"|"warn"|""} type     
+ * @param {string} st                           
  */
 function setRes(txt, type, st) {
   const box    = document.getElementById("resBox");
@@ -112,7 +112,7 @@ function setScanLoading(on) {
 
   } else {
     clearInterval(_scanInterval);
-    fill.style.width = "100%";           // nhảy 100% khi có kết quả
+    fill.style.width = "100%";           
     setTimeout(() => {
       bar.classList.remove("on");
       fill.style.width = "0%";
@@ -125,7 +125,7 @@ function setScanLoading(on) {
 /**
  * Cập nhật đồng thời nút ví trên desktop và mobile.
  * @param {string} label - Text hiển thị trên nút
- * @param {string} cls   - CSS class bổ sung (vd: "connected")
+ * @param {string} cls   - CSS class bổ sung 
  */
 function setWUI(label, cls) {
   const targets = [
@@ -237,23 +237,23 @@ async function checkScam() {
   setRes("Đang phân tích bằng AI...", "", "Đang xử lý");
 
   try {
-    const res = await fetch("http://localhost:5101/check", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ message: input }),
-    });
+  const res = await fetch("http://localhost:3001/api/daa");
 
-    // Kiểm tra HTTP status
-    if (!res.ok) {
-      throw new Error(`Server lỗi: ${res.status} ${res.statusText}`);
-    }
+  if (!res.ok) {
+    throw new Error(`Server lỗi: ${res.status} ${res.statusText}`);
+  }
 
-    const data = await res.json();
+  const data = await res.json();
+  console.log("DAA data:", data);
 
-    // Kiểm tra format response
-    if (!data || typeof data.result === "undefined") {
-      throw new Error("Response từ server không hợp lệ");
-    }
+  // ⚠️ TẠM thời bạn chưa có AI → fake result
+  const resultText = "⚠️ Đây là dữ liệu test từ DAA API";
+
+  const type = "warn";
+
+  setRes(resultText, type, "Test API thành công");
+
+} catch (err) {
 
     // Tự động phân loại kết quả dựa trên keywords
     const lower = data.result.toLowerCase();
