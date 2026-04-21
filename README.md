@@ -55,12 +55,10 @@ AI Scam Detector giúp:
     cd AI-Scam-Detector
  2. Chạy Backend
     cd Backend
-    npm install
-    npm run dev
+    node server.js
 
 
  3. Chạy Frontend
     cd frontend
-    npm install
-    npm start
+    npm run dev
 
