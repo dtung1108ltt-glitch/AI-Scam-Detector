@@ -226,6 +226,7 @@ async function switchToBNBTestnet(provider) {
  */
 async function checkScam() {
   const input = document.getElementById("scamInput").value.trim();
+  const DAA_PROXY_ENDPOINT = "http://localhost:3001/api/daa";
 
   // Validate: không cho submit khi rỗng
   if (!input) {
@@ -237,26 +238,23 @@ async function checkScam() {
   setRes("Đang phân tích bằng AI...", "", "Đang xử lý");
 
   try {
-  const res = await fetch("http://localhost:3001/api/daa");
+    const res = await fetch(DAA_PROXY_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: "/public/trade-spot/ticker/24h",
+        params: { symbol: "btcusdt" }
+      })
+    });
+    if (!res.ok) {
+      throw new Error(`Server lỗi: ${res.status} ${res.statusText}`);
+    }
 
-  if (!res.ok) {
-    throw new Error(`Server lỗi: ${res.status} ${res.statusText}`);
-  }
+    const data = await res.json();
+    console.log("DAA data:", data);
+    const resultText = data?.message || "⚠️ Đây là dữ liệu test từ DAA API";
 
-  const data = await res.json();
-  console.log("DAA data:", data);
-
-  // ⚠️ TẠM thời bạn chưa có AI → fake result
-  const resultText = "⚠️ Đây là dữ liệu test từ DAA API";
-
-  const type = "warn";
-
-  setRes(resultText, type, "Test API thành công");
-
-} catch (err) {
-
-    // Tự động phân loại kết quả dựa trên keywords
-    const lower = data.result.toLowerCase();
+    const lower = resultText.toLowerCase();
     const type =
       lower.includes("scam") || lower.includes("lừa") || lower.includes("nguy hiểm")
         ? "danger"
@@ -270,7 +268,7 @@ async function checkScam() {
       warn:   "⚡ Cần chú ý",
     };
 
-    setRes(data.result, type, statusMap[type]);
+    setRes(resultText, type, statusMap[type]);
 
     // Đẩy vào lịch sử
     pushHistory(
@@ -284,7 +282,7 @@ async function checkScam() {
 
     setRes(
       isNetworkErr
-        ? "Không thể kết nối server. Hãy chắc chắn backend đang chạy tại localhost:8000"
+        ? "Không thể kết nối server. Hãy chắc chắn backend proxy đang chạy tại localhost:3001"
         : "Lỗi: " + err.message,
       "danger",
       "Lỗi hệ thống"

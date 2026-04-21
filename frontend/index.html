@@ -1038,7 +1038,7 @@ textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 
                 <ol style="font-size:12px;color:var(--text-2);padding-left:16px;line-height:2;margin:0">
                   <li>Tải file <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">daa-proxy-server.js</code></li>
                   <li>Chạy: <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">npm i express cors && node daa-proxy-server.js</code></li>
-                  <li>Điền <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">http://localhost:3001/proxy</code> vào ô Proxy URL bên trên</li>
+                  <li>Điền <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">http://localhost:3001/api/daa</code> vào ô Proxy URL bên trên</li>
                   <li>Nhấn Test kết nối lại</li>
                 </ol>
               </div>
@@ -1048,7 +1048,7 @@ textarea#scamInput:focus{border-color:var(--brand);background:#fff;box-shadow:0 
           <div id="daaFixProxy" style="display:none;background:var(--surface2);border:1px solid var(--border);border-top:none;padding:14px;font-size:12.5px;color:var(--text-2);line-height:1.8">
             <strong>Proxy server chưa chạy</strong> hoặc sai URL.<br>
             Mở terminal và chạy: <code style="background:var(--surface);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:12px">node daa-proxy-server.js</code>
-            rồi đảm bảo Proxy URL là <code style="background:var(--surface);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:12px">http://localhost:3001/proxy</code>
+            rồi đảm bảo Proxy URL là <code style="background:var(--surface);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:12px">http://localhost:3001/api/daa</code>
           </div>
         </div>
       </div>
@@ -1284,7 +1284,12 @@ const pageNames = {dashboard:'Dashboard','analyze':'Phân tích Scam',history:'L
 function goPage(id, navEl) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+  const targetPage = document.getElementById('page-'+id);
+  if (!targetPage) {
+    console.warn('goPage target not found:', id);
+    return;
+  }
+  targetPage.classList.add('active');
   if(navEl) navEl.classList.add('active');
   document.getElementById('crumbCur').textContent = pageNames[id] || id;
   if(id === 'history') renderHistoryPage();
@@ -1952,24 +1957,27 @@ function closeBankModal(e) {
 
 // ═══════════════════════════════════════════════════════════════════════
 // DAA CRYPTO MARKET — DAATHENA.COM API INTEGRATION
-// Base URL: https://api.daathena.com/api/v2
-// Auth: Header "Authorization: YOUR_API_KEY"
+// Base URL: https://api.daathena.com/api/v2 (called by backend proxy)
+// Auth: Header "Authorization: YOUR_API_KEY" (handled in backend)
 // Docs: https://docs.daathena.com/api-docs
 // ═══════════════════════════════════════════════════════════════════════
 
 // ─── CẤU HÌNH DAA API ───────────────────────────────────────────────
 // Cách dùng: nhập API key vào ô trong trang DAA Market
 // Lấy key tại: https://daathena.com/vi/settings/api-keys
-const DAA_DIRECT_URL = 'https://api.daathena.com/api/v2';
 // ─── BACKEND URL ─────────────────────────────────────────────────────
-// Khi chạy backend api.py (port 8080), đổi thành 'http://localhost:8080'
-// Backend tự proxy DAA API — không cần DAA_PROXY_URL riêng nữa
-const BACKEND_URL = localStorage.getItem('ss_backend_url') || 'http://localhost:8080';
+// Backend proxy mặc định chạy ở port 3001
+const BACKEND_URL = localStorage.getItem('ss_backend_url') || 'http://localhost:3001';
 
-// Proxy URL — để trống '' nếu dùng BACKEND_URL ở trên
-// Chỉ cần khi không chạy backend Python
-const DAA_PROXY_URL = localStorage.getItem('ss_daa_proxy') || (BACKEND_URL ? BACKEND_URL + '/daa/proxy' : '');
+// Proxy URL mặc định qua backend local
+const DAA_PROXY_URL = localStorage.getItem('ss_daa_proxy') || (BACKEND_URL ? BACKEND_URL + '/api/daa' : '');
 let daaAllCurrencies = [];
+
+function normalizeProxyUrl(url) {
+  const raw = (url || '').trim();
+  if (!raw) return '';
+  return /^https?:\/\//i.test(raw) ? raw : `http://${raw}`;
+}
 
 // ─── Lấy DAA API key ─────────────────────────────────────────────────
 function getDaaKey() {
@@ -1993,56 +2001,35 @@ function setDaaStatus(text, dotColor, textColor) {
   if (txt) { txt.textContent = text; txt.style.color = textColor || 'var(--text-2)'; }
 }
 
-// ─── Wrapper gọi DAA API ─────────────────────────────────────────────
-// Tự động chọn: proxy (nếu DAA_PROXY_URL có giá trị) hoặc gọi thẳng
+// ─── Wrapper gọi DAA API qua backend proxy ────────────────────────────
 async function daaFetch(endpoint, params = {}) {
   const key = getDaaKey();
-  const proxyUrl = localStorage.getItem('ss_daa_proxy') || '';
+  const proxyUrl = normalizeProxyUrl(localStorage.getItem('ss_daa_proxy') || DAA_PROXY_URL);
+  if (!proxyUrl) throw new DaaProxyError('Proxy URL chưa được cấu hình', 'proxy_offline');
 
-  if (proxyUrl) {
-    // ── Mode 1: Qua proxy server ──────────────────────────────────────
-    let resp;
-    try {
-      resp = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: endpoint, params, apiKey: key }),
-      });
-    } catch(netErr) {
-      // Proxy server chưa chạy hoặc sai URL
-      throw new DaaProxyError(
-        'Không kết nối được tới proxy server tại: ' + proxyUrl,
-        'proxy_offline'
-      );
-    }
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.message || 'Proxy lỗi HTTP ' + resp.status);
-    }
-    const data = await resp.json();
-    if (data.error === true) throw new Error(data.message || 'DAA API error');
-    return data;
+  let resp;
+  try {
+    resp = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: endpoint, params, apiKey: key }),
+    });
+  } catch(netErr) {
+    throw new DaaProxyError(
+      'Không kết nối được tới proxy server tại: ' + proxyUrl,
+      'proxy_offline'
+    );
+  }
 
-  } else {
-    // ── Mode 2: Gọi thẳng DAA API ────────────────────────────────────
-    const url = new URL(DAA_DIRECT_URL + endpoint);
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    let resp;
-    try {
-      resp = await fetch(url.toString(), {
-        headers: key ? { 'Authorization': key } : {},
-      });
-    } catch(netErr) {
-      throw new Error('Không thể kết nối DAA API — kiểm tra mạng internet');
-    }
+  const payload = await resp.json().catch(() => ({}));
+  if (!resp.ok || payload?.error === true) {
     if (resp.status === 403) throw new DaaWhitelistError();
     if (resp.status === 401) throw new Error('API Key không hợp lệ hoặc hết hạn');
     if (resp.status === 404) throw new Error('Endpoint không tồn tại');
-    if (!resp.ok) throw new Error('DAA API lỗi HTTP ' + resp.status);
-    const data = await resp.json();
-    if (data.error === true) throw new Error(data.message || 'DAA API error');
-    return data;
+    throw new Error(payload?.message || 'Proxy lỗi HTTP ' + resp.status);
   }
+
+  return payload;
 }
 
 // Custom error classes để hiện đúng hướng dẫn
@@ -2064,13 +2051,12 @@ async function testDaaConnection() {
   setDaaStatus('Đang kiểm tra...', '#F59E0B', '#F59E0B');
   hideDaaError();
   try {
-    const data = await daaFetch('/public/trade-spot/ticker/24h', { symbol: 'btcusdt' });
-    const price = data?.data?.lastPrice;
-    const proxyUrl = localStorage.getItem('ss_daa_proxy') || '';
-    const mode = proxyUrl ? '(qua proxy)' : '(trực tiếp)';
-    setDaaStatus(`✅ Kết nối OK ${mode} — BTC = $${price?.toLocaleString('en-US') || '?'}`, '#0BAF6A', '#0BAF6A');
+    // Dùng endpoint public đang được dùng để tải thị trường
+    // nhằm tránh false-negative khi ticker endpoint bị giới hạn riêng.
+    const data = await daaFetch('/public/wallet/currencies', { page: '1', per_page: '1' });
+    const total = data?.data?.total || data?.data?.currencies?.length || 1;
+    setDaaStatus(`✅ Kết nối OK (qua backend proxy) — Market ready (${total})`, '#0BAF6A', '#0BAF6A');
     toast('✅ DAA API kết nối thành công!');
-    updateBtcTicker(data.data);
   } catch (e) {
     setDaaStatus('❌ ' + e.message, '#E53935', '#E53935');
     showDaaError(e);  // pass full error object để detect type
@@ -2103,6 +2089,10 @@ function showDaaError(err) {
   } else if (errType === 'proxy_offline' || msg.includes('ERR_CONNECTION_REFUSED') || msg.includes('Failed to fetch')) {
     // Proxy chưa chạy
     if (fixPxy) fixPxy.style.display = 'block';
+  } else if (msg.includes('Missing DAA API key')) {
+    if (msgEl) msgEl.textContent = 'Thiếu API key. Nhập key ở ô API Key rồi bấm Test lại.';
+  } else if (msg.includes('Endpoint không tồn tại') || msg.includes('Invalid path')) {
+    if (msgEl) msgEl.textContent = 'Sai endpoint DAA. Kiểm tra lại backend proxy và đường dẫn API.';
   }
 }
 
@@ -2112,14 +2102,15 @@ function hideDaaError() {
 }
 
 function onDaaProxyChange(input) {
-  const url = input.value.trim();
-  try { localStorage.setItem('ss_daa_proxy', url); } catch(e) {}
-  if (url) {
+  const normalizedUrl = normalizeProxyUrl(input.value);
+  input.value = normalizedUrl;
+  try { localStorage.setItem('ss_daa_proxy', normalizedUrl); } catch(e) {}
+  if (normalizedUrl) {
     input.style.borderColor = 'var(--brand)';
-    toast('💾 Đã lưu Proxy URL: ' + url);
+    toast('💾 Đã lưu Proxy URL: ' + normalizedUrl);
   } else {
     input.style.borderColor = 'var(--border)';
-    toast('🗑 Đã xóa Proxy URL — sẽ gọi DAA API trực tiếp');
+    toast('🗑 Đã xóa Proxy URL — sẽ quay về URL mặc định backend proxy');
   }
 }
 
@@ -2153,7 +2144,7 @@ async function fetchMyIp() {
 async function refreshBtcTicker() {
   try {
     const data = await daaFetch('/public/trade-spot/ticker/24h', { symbol: 'btcusdt' });
-    updateBtcTicker(data.data);
+    updateBtcTicker(data?.data || data?.data?.ticker || data);
   } catch(e) {
     toast('⚠️ Không tải được ticker: ' + e.message);
   }
@@ -2161,23 +2152,32 @@ async function refreshBtcTicker() {
 
 function updateBtcTicker(d) {
   if (!d) return;
+  const toNum = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
   const priceEl = document.getElementById('daaBtcPrice');
   const changeEl = document.getElementById('daaBtcChange');
   const highEl   = document.getElementById('daaBtcHigh');
   const lowEl    = document.getElementById('daaBtcLow');
   const volEl    = document.getElementById('daaBtcVol');
   const timeEl   = document.getElementById('daaBtcTime');
+  const price = toNum(d.lastPrice);
+  const changePct = toNum(d.priceChangePercent);
+  const high = toNum(d.highPrice);
+  const low = toNum(d.lowPrice);
+  const vol = toNum(d.volume);
 
-  if (priceEl) priceEl.textContent = '$' + (d.lastPrice || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (priceEl) priceEl.textContent = '$' + price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   if (changeEl) {
-    const pct = (d.priceChangePercent || 0).toFixed(4);
-    const isUp = parseFloat(pct) >= 0;
+    const pct = changePct.toFixed(4);
+    const isUp = changePct >= 0;
     changeEl.textContent = (isUp ? '▲ +' : '▼ ') + pct + '%';
     changeEl.style.color = isUp ? 'var(--safe)' : 'var(--danger)';
   }
-  if (highEl) highEl.textContent = '$' + (d.highPrice || 0).toLocaleString();
-  if (lowEl)  lowEl.textContent  = '$' + (d.lowPrice  || 0).toLocaleString();
-  if (volEl)  volEl.textContent  = (d.volume || 0).toFixed(4);
+  if (highEl) highEl.textContent = '$' + high.toLocaleString('en-US', {maximumFractionDigits:2});
+  if (lowEl)  lowEl.textContent  = '$' + low.toLocaleString('en-US', {maximumFractionDigits:2});
+  if (volEl)  volEl.textContent  = vol.toFixed(4);
   if (timeEl) timeEl.textContent = 'Cập nhật: ' + new Date().toLocaleTimeString('vi-VN');
 }
 
@@ -2347,7 +2347,7 @@ async function loadOrderbook(symbol) {
 function restoreDaaKey() {
   try {
     const savedKey   = localStorage.getItem('ss_daa_key')   || '';
-    const savedProxy = localStorage.getItem('ss_daa_proxy') || '';
+    const savedProxy = normalizeProxyUrl(localStorage.getItem('ss_daa_proxy') || DAA_PROXY_URL);
 
     const keyInp   = document.getElementById('daaApiKeyInput');
     const proxyInp = document.getElementById('daaProxyInput');
@@ -2358,6 +2358,7 @@ function restoreDaaKey() {
     }
     if (savedProxy && proxyInp) {
       proxyInp.value = savedProxy;
+      try { localStorage.setItem('ss_daa_proxy', savedProxy); } catch(e) {}
     }
   } catch(e) {}
 }
